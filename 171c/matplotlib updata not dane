@@ -18,4 +18,5 @@ def update(data):
     return line,  
   
 ani = animation.FuncAnimation(fig, update, metric, interval=2*1000)  
+#                                  更新函数 数据
 plt.show()  
