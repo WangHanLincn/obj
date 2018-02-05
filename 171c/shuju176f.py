@@ -1644,53 +1644,83 @@ class AppForm(QMainWindow):
                 self.label_2.setPixmap(im2)
                 QApplication.processEvents()
 
-    def one_step_up(self):
+        def one_step_up(self):
+        global h
         global d
+        h = True
         d = False
+        one_step_updata = threading.Thread(target=self.one_step_updata, name='one_step_updata')
+        one_step_updata.setDaemon(True)
+        one_step_updata.start()
+        self.one_step_run()
+
+    def one_step_run(self):
+        global h
+        global im
         im = None
-        self.read_num = self.read_num + 1
-        self.t = self.read_num
-        self.textbox2.setText('%d ' % self.t)
-        if self.read_num <= len(self.event_msg):
-            self.log.seek(self.event_msg[self.read_num-1][2])
-            event_readed = self.log.next()
-            if event_readed.channel == 'CAMLANE':
-                try:
-                    msg = lcmtypes.image_fragment_t.decode(event_readed.data)
-                    im = msg.image
-                except ValueError:
-                    msg = lcmtypes.image_fragment_t.decode(event_readed.data)
-                    im = msg.image
-        im2 = QtGui.QPixmap()
-        if im != None:
-            im2.loadFromData(im)
-            self.label_2.setPixmap(im2)
-            self.slider.setValue(self.t)
-            QApplication.processEvents()
+        while h:
+            self.read_num = self.read_num + 1
+            self.t = self.read_num
+            self.textbox2.setText('%d ' % self.t)
+            self.slidervaluechange.emit()  # 发送信号
+            if self.read_num <= len(self.event_msg):
+                self.log.seek(self.event_msg[self.read_num-1][2])
+                event_readed = self.log.next()
+                if event_readed.channel == 'CAMLANE':
+                    try:
+                        msg = lcmtypes.image_fragment_t.decode(event_readed.data)
+                        im = msg.image
+                        h = False
+                    except ValueError:
+                        msg = lcmtypes.image_fragment_t.decode(event_readed.data)
+                        im = msg.image
+                        h = False
+                    self.slider.setValue(self.read_num)
+            time.sleep(0.001)
+
+    def one_step_updata(self):
+        while h:
+            im2 = QtGui.QPixmap()
+            time.sleep(0.04)
+            if im != None:
+                im2.loadFromData(im)
+                self.label_2.setPixmap(im2)
+                self.slider.setValue(self.t)
+                QApplication.processEvents()
 
     def one_step_donw(self):
+        global h
         global d
+        h = True
         d = False
-        im = None
-        self.read_num = self.read_num - 1
-        self.t = self.read_num
-        self.textbox2.setText('%d ' % self.t)
-        if self.read_num <= len(self.event_msg):
-            self.log.seek(self.event_msg[self.read_num-1][2])
-            event_readed = self.log.next()
-            if event_readed.channel == 'CAMLANE':
-                try:
-                    im = lcmtypes.image_t.decode(event_readed.data)
+        one_step_updata = threading.Thread(target=self.one_step_updata, name='one_step_updata')
+        one_step_updata.setDaemon(True)
+        one_step_updata.start()
+        self.one_step_back()
 
-                except ValueError:
-                    msg = lcmtypes.image_fragment_t.decode(event_readed.data)
-                    im = msg.image
-        im2 = QtGui.QPixmap()
-        if im != None:
-            im2.loadFromData(im)
-            self.label_2.setPixmap(im2)
-            self.slider.setValue(self.t)
-            QApplication.processEvents()
+    def one_step_back(self):
+        global h
+        global im
+        im = None
+        while h:
+            self.read_num = self.read_num - 1
+            self.t = self.read_num
+            self.textbox2.setText('%d ' % self.t)
+            self.slidervaluechange.emit()  # 发送信号
+            if self.read_num <= len(self.event_msg):
+                self.log.seek(self.event_msg[self.read_num-1][2])
+                event_readed = self.log.next()
+                if event_readed.channel == 'CAMLANE':
+                    try:
+                        msg = lcmtypes.image_fragment_t.decode(event_readed.data)
+                        im = msg.image
+                        h = False
+                    except ValueError:
+                        msg = lcmtypes.image_fragment_t.decode(event_readed.data)
+                        im = msg.image
+                        h = False
+                    self.slider.setValue(self.read_num)
+            time.sleep(0.001)
 
     def show_image_n(self):
         sys.setrecursionlimit(100000000)
