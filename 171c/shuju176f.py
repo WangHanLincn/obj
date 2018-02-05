@@ -39,7 +39,7 @@ class AppForm(QMainWindow):
         file_choices = "PNG (*.png)|*.png"
 
         path = QFileDialog.getSaveFileName(self,
-                                           'Save file', '',
+                                           '保存', '',
                                            file_choices)
         if path:
             self.canvas.print_figure(path, dpi=self.dpi)
@@ -58,7 +58,7 @@ class AppForm(QMainWindow):
          * 特别注意，退出前请务必点击“停止播放”按钮，以确保关闭时能完全关闭软件的所有线程。
          * 如发现问题请联系我们。
         """
-        QMessageBox.about(self, "About the demo", msg.strip())
+        QMessageBox.about(self, "关于本软件", msg.strip())
 
     def on_pick(self, event):
         box_points = event.artist.get_bbox().get_points()
@@ -1511,21 +1511,21 @@ class AppForm(QMainWindow):
         self.textbox.setText('时间戳编号将跳转至%d' % time_num[0])
 
     def create_menu(self):
-        self.file_menu = self.menuBar().addMenu("&File")
+        self.file_menu = self.menuBar().addMenu("&文件")
 
-        load_file_action = self.create_action("&Save plot",
+        load_file_action = self.create_action("&保存图像",
                                               shortcut="Ctrl+S", slot=self.save_plot,
                                               tip="Save the plot")
-        quit_action = self.create_action("&Quit", slot=self.close,
+        quit_action = self.create_action("&退出", slot=self.close,
                                          shortcut="Ctrl+Q", tip="Close the application")
 
         self.add_actions(self.file_menu,
                          (load_file_action, None, quit_action))
 
-        self.help_menu = self.menuBar().addMenu("&Help")
-        about_action = self.create_action("&About",
+        self.help_menu = self.menuBar().addMenu("&帮助")
+        about_action = self.create_action("&关于",
                                           shortcut='F1', slot=self.on_about,
-                                          tip='About the demo')
+                                          tip='关于本软件')
 
         self.add_actions(self.help_menu, (about_action,))
 
