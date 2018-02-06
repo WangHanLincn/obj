@@ -295,7 +295,6 @@ class AppForm(QMainWindow):
         vbox2.addWidget(self.Button41)
         vbox2.addWidget(self.textbox)
         vbox2.addWidget(self.Button54)
-        vbox2.addWidget(self.reviewEdit)
 
         hbox3 = QHBoxLayout()
         hbox3.addWidget(self.Button55)
@@ -312,19 +311,22 @@ class AppForm(QMainWindow):
         hbox5.addWidget(self.Button61)
         hbox5.addWidget(self.Button59)
 
+        hbox1 = QHBoxLayout()
+        hbox1.addWidget(self.label_2)
+        hbox1.addLayout(vbox2)
+
         vbox3 = QVBoxLayout()
-        vbox3.addWidget(self.label_2)
-        vbox3.addLayout(hbox4)
+        vbox3.addLayout(hbox1)
         vbox3.addWidget(self.label_4)
+        vbox3.addLayout(hbox4)
         vbox3.addLayout(hbox3)
         vbox3.addLayout(hbox5)
-        vbox3.addWidget(self.label_3)
+        vbox3.addWidget(self.reviewEdit)
 
         hbox = QHBoxLayout()
-        hbox.addLayout(vbox2)
         hbox.addLayout(vbox1)
         hbox.addLayout(vbox3)
-
+        
         self.main_frame.setLayout(hbox)
         self.setGeometry(150, 40, 1600, 980)
         self.setCentralWidget(self.main_frame)
