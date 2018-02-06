@@ -119,6 +119,13 @@ class AppForm(QMainWindow):
 
         self.tab1 = QScrollArea()
         self.tab1.setWidget(QWidget())
+        background_color = QColor()
+        background_color.setNamedColor('#E6E6FA')
+        self.tab1.setAutoFillBackground(True)
+        palette = QPalette()
+        palette.setColor(QPalette.Window, background_color)
+        self.tab1.setPalette(palette)
+        self.tab1.setAlignment(Qt.AlignCenter)
         self.tab1.setMaximumSize(QtCore.QSize(250,500))
         self.tab1.setWidgetResizable(True)
         self.text_browser_1 = QPushButton("目标速度")
