@@ -1522,9 +1522,15 @@ class AppForm(QMainWindow):
                                          shortcut="Alt+6", tip="Close the application")
         one_step_donw = self.create_action("&后退一步", slot=self.one_step_donw,
                                          shortcut="Alt+4", tip="Close the application")
+        pause = self.create_action("&暂停", slot=self.pause,
+                                           shortcut="F9", tip="Close the application")
+        resume = self.create_action("&开始", slot=self.resume,
+                                           shortcut="F11", tip="Close the application")
+        stope_image = self.create_action("&停止播放", slot=self.stope_image,
+                                    shortcut="P", tip="Close the application")
 
         self.add_actions(self.file_menu,
-                         (load_file_action, one_step_up, one_step_donw, None, quit_action))
+                         (load_file_action, one_step_up, one_step_donw, resume, pause, stope_image, None, quit_action))
 
         self.help_menu = self.menuBar().addMenu("&帮助")
         about_action = self.create_action("&关于",
