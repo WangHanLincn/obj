@@ -199,8 +199,12 @@ class AppForm(QMainWindow):
         self.Button59.setMaximumWidth(250)
         self.Button60 = QPushButton("后退一步")
         self.Button60.setMaximumWidth(250)
-        self.Button61 = QPushButton("从当前位置播放")
+        self.Button61 = QPushButton("开始播放")
         self.Button61.setMaximumWidth(250)
+        self.Button62 = QPushButton("前进")
+        self.Button62.setMaximumWidth(250)
+        self.Button63 = QPushButton("后退")
+        self.Button63.setMaximumWidth(250)
 
         self.text_browser_1.clicked.connect(self.SPEED_CMD_aim_spe)
         self.text_browser_2.clicked.connect(self.SPEED_CMD_mode)
@@ -261,6 +265,8 @@ class AppForm(QMainWindow):
         self.Button59.clicked.connect(self.one_step_up)
         self.Button60.clicked.connect(self.one_step_donw)
         self.Button61.clicked.connect(self.show_image_n)
+        self.Button62.clicked.connect(self.step_up)
+        self.Button63.clicked.connect(self.step_donw)
 
         vbox1 = QVBoxLayout()
         vbox1.addWidget(self.mpl_toolbar)
@@ -310,9 +316,11 @@ class AppForm(QMainWindow):
         hbox4.addLayout(h1box)
 
         hbox5 = QHBoxLayout()
-        hbox5.addWidget(self.Button60)
         hbox5.addWidget(self.Button61)
+        hbox5.addWidget(self.Button63)
+        hbox5.addWidget(self.Button60)
         hbox5.addWidget(self.Button59)
+        hbox5.addWidget(self.Button62)
 
         hbox1 = QHBoxLayout()
         hbox1.addWidget(self.label_2)
@@ -1529,18 +1537,24 @@ class AppForm(QMainWindow):
         quit_action = self.create_action("&退出", slot=self.close,
                                          shortcut="Ctrl+Q", tip="Close the application")
         one_step_up = self.create_action("&前进一步", slot=self.one_step_up,
-                                         shortcut="Alt+6", tip="Close the application")
+                                         shortcut="Alt+Right", tip="Close the application")
         one_step_donw = self.create_action("&后退一步", slot=self.one_step_donw,
-                                         shortcut="Alt+4", tip="Close the application")
+                                         shortcut="Alt+Left", tip="Close the application")
         pause = self.create_action("&暂停", slot=self.pause,
                                            shortcut="F9", tip="Close the application")
         resume = self.create_action("&继续", slot=self.resume,
                                            shortcut="F11", tip="Close the application")
         stope_image = self.create_action("&停止播放", slot=self.stope_image,
                                     shortcut="P", tip="Close the application")
+        show_image_n = self.create_action("&开始播放", slot=self.show_image_n,
+                                         shortcut="Space", tip="Close the application")
+        step_up = self.create_action("&前进一步", slot=self.step_up,
+                                         shortcut="Right", tip="Close the application")
+        step_donw = self.create_action("&后退一步", slot=self.step_donw,
+                                           shortcut="Left", tip="Close the application")
 
         self.add_actions(self.file_menu,
-                         (load_file_action, one_step_up, one_step_donw, resume, pause, stope_image, None, quit_action))
+                         (load_file_action, one_step_up, one_step_donw, resume, pause, stope_image, show_image_n, step_up, step_donw, None, quit_action))
 
         self.help_menu = self.menuBar().addMenu("&帮助")
         about_action = self.create_action("&关于",
