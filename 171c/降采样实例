@@ -6,3 +6,5 @@ ts = Series(np.arange(12), index=rng)
 print(ts)
 ts1 = ts.resample('5min').ohlc()
 print(ts1)
+
+# python2.7: ts1 = ts.resample('5min',how='ohlc')
