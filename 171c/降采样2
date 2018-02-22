@@ -7,6 +7,7 @@ ts1 = ts.resample('5min').mean()
 print (ts1)
 # python2.7: ts1 = ts.resample('5min',how='mean')
 #ts1 = ts.resample(freq).how().
-#how用于产生聚合值的函数名或数组函数，例如‘mean’、‘ohlc’、np.max等，默认是‘mean’，其他常用的值由：‘first’、‘last’、‘median’、‘max’、‘min’
+#how 用于产生聚合值的函数名或数组函数，例如‘mean’、‘ohlc’、np.max等，默认是‘mean’，其他常用的值由：‘first’、‘last’、‘median’、‘max’、‘min’
 #mean(平均数），median(中位数）
 #freq	表示重采样频率，例如‘M’、‘5min’，Second(15)
+#数组的index必须是datetime
