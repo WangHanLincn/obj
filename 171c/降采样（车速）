@@ -1,0 +1,61 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+f = open('F:\\python_data\\text\\untitled\\171c\\gps_data.txt', 'r')
+time = []
+velocity = []
+done = 0
+while not done:
+    line = f.readline()
+    line = line.strip('\n')
+    if line != '':
+        a = line.split(' ')
+        if len(a) == 14:
+            time.append(float(a[0]))
+            velocity.append(float(a[10]))
+    else:
+        done = 1
+f.close
+x = np.array(time)
+y = np.array(velocity)
+
+def get_peaks(x, y, n, x0=None, x1=None):
+    if x0 is None:
+        x0 = x[0]
+    if x1 is None:
+        x1 = x[-1]
+    index0 = np.searchsorted(x, x0)
+    index1 = np.searchsorted(x, x1, side="right")
+    step = (index1 - index0) // n
+    if step == 0:
+        step = 1
+    index1 += 2 * step
+    if index0 < 0:
+        index0 = 0
+    if index1 > len(x) - 1:
+        index1 = len(x) - 1
+    x = x[index0:index1 + 1]
+    y = y[index0:index1 + 1]
+    y = y[:len(y) // step * step]
+    yy = y.reshape(-1, step)
+    index = np.c_[np.argmin(yy, axis=1), np.argmax(yy, axis=1)]
+    index.sort(axis=1)
+    index += np.arange(0, len(y), step).reshape(-1, 1)
+    index = index.reshape(-1)
+    return x[index], y[index]
+
+ax = plt.subplot(111)
+n = get_peaks(x, y, 1000)
+line, = plt.plot(n[0],n[1])
+
+ax = plt.gca()
+
+def update_data(ax):
+    x0, x1 = ax.get_xlim()
+    n = get_peaks(x, y, 1000, x0, x1)
+    line.set_data(n[0],n[1])
+    ax.figure.canvas.draw()
+
+ax.callbacks.connect('xlim_changed', update_data)
+
+plt.show()
