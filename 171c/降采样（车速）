@@ -1,3 +1,8 @@
+#感谢HyryStudio的ChinaUnix微博《通过降低采样点数快速绘制曲线》
+#原微博地址：http://blog.chinaunix.net/uid-23100982-id-3169252.html
+
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 
