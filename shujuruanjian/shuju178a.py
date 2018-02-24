@@ -68,16 +68,41 @@ class AppForm(QMainWindow):
         QMessageBox.information(self, "Click!", msg)
 
     def clear(self):
-        self.plt.clear()
+        self.ax.clear()
         self.canvas.draw()
         self.plt1.clear()
         self.canvas1.draw()
+
+    def get_peaks(self, x, y, n, x0=None, x1=None):
+        if x0 is None:
+            x0 = x[0]
+        if x1 is None:
+            x1 = x[-1]
+        index0 = np.searchsorted(x, x0)
+        index1 = np.searchsorted(x, x1, side="right")
+        step = (index1 - index0) // n
+        if step == 0:
+            step = 1
+        index1 += 2 * step
+        if index0 < 0:
+            index0 = 0
+        if index1 > len(x) - 1:
+            index1 = len(x) - 1
+        x = x[index0:index1 + 1]
+        y = y[index0:index1 + 1]
+        y = y[:len(y) // step * step]
+        yy = y.reshape(-1, step)
+        index = np.c_[np.argmin(yy, axis=1), np.argmax(yy, axis=1)]
+        index.sort(axis=1)
+        index += np.arange(0, len(y), step).reshape(-1, 1)
+        index = index.reshape(-1)
+        return x[index], y[index]
 
     def create_main_frame(self):
         self.main_frame = QWidget()
 
         self.dpi = 100
-        self.fig = Figure((6.5, 3.0), dpi=self.dpi)
+        self.fig = plt.figure(None, (6.5, 3.0), dpi=self.dpi)
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setParent(self.main_frame)
         self.fig1 = Figure((6.5, 3.0), dpi=self.dpi)
@@ -103,7 +128,7 @@ class AppForm(QMainWindow):
         self.textbox2 = QLineEdit()
         self.textbox2.setMaximumWidth(140)
 
-        self.plt = self.fig.add_subplot(111)
+        self.ax = self.fig.add_subplot(111)
         self.plt1 = self.fig1.add_subplot(111)
         self.plt1.set_xticks([-15, -10, -5, 0, 5, 10, 15])
         self.plt1.set_yticks((0, 20, 40, 60, 80, 100))
@@ -209,6 +234,8 @@ class AppForm(QMainWindow):
         self.Button62.setMaximumWidth(250)
         self.Button63 = QPushButton("后退")
         self.Button63.setMaximumWidth(250)
+        self.Button64 = QPushButton("更新图像")
+        self.Button64.setMaximumWidth(250)
 
         self.text_browser_1.clicked.connect(self.SPEED_CMD_aim_spe)
         self.text_browser_2.clicked.connect(self.SPEED_CMD_mode)
@@ -271,6 +298,7 @@ class AppForm(QMainWindow):
         self.Button61.clicked.connect(self.show_image_n)
         self.Button62.clicked.connect(self.step_up)
         self.Button63.clicked.connect(self.step_donw)
+        self.Button64.clicked.connect(self.update_pltdata)
 
         vbox1 = QVBoxLayout()
         vbox1.addWidget(self.mpl_toolbar)
@@ -303,6 +331,7 @@ class AppForm(QMainWindow):
         vbox2 = QVBoxLayout()
         vbox2.addWidget(self.tab1)
         vbox2.addWidget(self.fileButton)
+        vbox2.addWidget(self.Button64)
         vbox2.addWidget(self.Button32)
         vbox2.addWidget(self.Button38)
         vbox2.addWidget(self.Button41)
@@ -366,8 +395,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time,aim_speed, color='r', label='目标车速', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(aim_speed)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0],n[1], color='r', label='目标车速', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def SPEED_CMD_mode(self):
@@ -387,8 +419,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, mode, color='k', label='驾驶模式', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(mode)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='k', label='驾驶模式', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def SPEED_CMD_t(self):
@@ -408,8 +443,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, t, color='g', label='达到目标速度时间', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(t)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='g', label='达到目标速度时间', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def STEER_CMD_steer_pos(self):
@@ -429,8 +467,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, steer_pos, color='m', label='决策方向盘转角', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(steer_pos)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='m', label='决策方向盘转角', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def STEER_CMD_steer_spe(self):
@@ -450,8 +491,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, steer_spe, color='tan', label='决策方向盘转速', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(steer_spe)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='tan', label='决策方向盘转速', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def VEHICLE_STATUS_nauto(self):
@@ -473,8 +517,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time,mode, color='b', label='驾驶模式开关状态', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(mode)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='b', label='驾驶模式开关状态', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def VEHICLE_STATUS_steerPos(self):
@@ -496,8 +543,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, steerPos, color='yellow', label='方向盘转角', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(steerPos)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='yellow', label='方向盘转角', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def VEHICLE_STATUS_steerSpe(self):
@@ -519,8 +569,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, steerspe, color='darkviolet', label='方向盘转速', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(steerspe)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='darkviolet', label='方向盘转速', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def VEHICLE_STATUS_light(self):
@@ -542,8 +595,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, light, color='aqua', label='转向灯', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(light)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='aqua', label='转向灯', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def VEHICLE_STATUS_speLeft(self):
@@ -565,8 +621,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, speed, color='y', label='左轮速度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(speed)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='y', label='左轮速度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def VEHICLE_STATUS_speRight(self):
@@ -588,8 +647,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, speed, color='c', label='右轮速度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(speed)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='c', label='右轮速度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def VEHICLE_STATUS_vot(self):
@@ -611,8 +673,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, vot, color='brown', label='电压', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(vot)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='brown', label='电压', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def VEHICLE_STATUS_shift(self):
@@ -634,8 +699,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, shift, color='lime', label='挡位', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(shift)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='lime', label='挡位', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def VEHICLE_STATUS_disLeft(self):
@@ -657,8 +725,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, dis, color='gold', label='左轮距离', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(dis)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='gold', label='左轮距离', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def VEHICLE_STATUS_disRight(self):
@@ -680,8 +751,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, dis, color='orange', label='右轮距离', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(dis)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='orange', label='右轮距离', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def VEHICLE_STATUS_yawRate(self):
@@ -703,8 +777,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, yawrate, color='coral', label='横摆角速度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(yawrate)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='coral', label='横摆角速度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def VEHICLE_STATUS_accelerationLon(self):
@@ -726,8 +803,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, accelerationLon, color='peru', label='纵向加速度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(accelerationLon)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='peru', label='纵向加速度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def VEHICLE_STATUS_accelerationLat(self):
@@ -749,8 +829,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, accelerationLat, color='pink', label='横向加速度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(accelerationLat)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='peru', label='纵向加速度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def GPS_DATA_velocity(self):
@@ -772,8 +855,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, velocity, color='violet', label='车速', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(velocity)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='violet', label='车速', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def GPS_DATA_yaw(self):
@@ -795,8 +881,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, yaw, color='plum', label='航向角', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(yaw)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='plum', label='航向角', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def GPS_DATA_roll(self):
@@ -818,8 +907,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, roll, color='purple', label='翻滚角', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(roll)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='purple', label='翻滚角', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def GPS_DATA_pitch(self):
@@ -841,8 +933,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, pitch, color='indigo', label='俯仰角', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(pitch)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='indigo', label='俯仰角', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def GPS_DATA_yawRate(self):
@@ -864,8 +959,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, yawRate, color='navy', label='横摆角速度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(yawRate)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='navy', label='横摆角速度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def GPS_DATA_velocityNorth(self):
@@ -887,8 +985,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, velocityNorth, color='teal', label='北向车速', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(velocityNorth)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='teal', label='北向车速', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def GPS_DATA_velocityEast(self):
@@ -910,8 +1011,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, velocityEast, color='gray', label='东向车速', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(velocityEast)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='gray', label='东向车速', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def GPS_DATA_velocityDown(self):
@@ -933,8 +1037,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, velocityDown, color='darkred', label='垂直地面速度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(velocityDown)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='darkred', label='垂直地面速度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def GPS_DATA_locationStatus(self):
@@ -956,8 +1063,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, locationStatus, color='tomato', label='定位模式', marker='.')
-        self.plt.legend(loc='best')
+        self.pltself.x = np.array(time)
+        self.y = np.array(locationStatus)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='tomato', label='定位模式', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def GPS_DATA_confidenceLevel(self):
@@ -979,8 +1089,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, confidenceLevel, color='sienna', label='可信度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(confidenceLevel)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='sienna', label='可信度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def GPS_DATA_satelliteNumber(self):
@@ -1002,8 +1115,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, satelliteNumber, color='khaki', label='卫星数量', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(satelliteNumber)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='khaki', label='卫星数量', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def GPS_DATA_longittude_latitude(self):
@@ -1025,8 +1141,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(latitude, longittude, color='seagreen', label='经纬度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(latitude)
+        self.y = np.array(longittude)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='seagreen', label='经纬度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_change_lane(self):
@@ -1048,8 +1167,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, change_lane, color='deepskyblue', label='换道状态', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(change_lane)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='deepskyblue', label='换道状态', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_left_lane(self):
@@ -1071,8 +1193,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, left_lane, color='crimson', label='左车道线', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(left_lane)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='crimson', label='左车道线', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_right_lane(self):
@@ -1094,8 +1219,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, right_lane, color='orchid', label='右车道线', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(right_lane)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='orchid', label='右车道线', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_left_line_length(self):
@@ -1117,8 +1245,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, left_lane_length, color='dodgerblue', label='左车道线长度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(left_lane_length)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='dodgerblue', label='左车道线长度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_right_line_length(self):
@@ -1140,8 +1271,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, right_lane_length, color='thistle', label='右车道线长度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(right_lane_length)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='thistle', label='右车道线长度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_lane_width(self):
@@ -1163,8 +1297,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, lane_width, color='mediumspringgreen', label='车道宽度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(lane_width)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='mediumspringgreen', label='车道宽度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_object_count(self):
@@ -1186,8 +1323,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, object_count, color='mediumslateblue', label='目标个数', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(object_count)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='mediumslateblue', label='目标个数', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_object_id(self):
@@ -1209,8 +1349,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, object_id, color='maroon', label='目标的ID', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(object_id)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='maroon', label='目标的ID', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_object_type(self):
@@ -1232,8 +1375,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, object_type, color='sienna', label='目标类别', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(object_type)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='sienna', label='目标类别', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_object_brake(self):
@@ -1255,8 +1401,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, object_brake, color='chocolate', label='刹车状态', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(object_brake)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='chocolate', label='刹车状态', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_object_turn(self):
@@ -1278,8 +1427,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, object_turn, color='saddlebrown', label='转向灯状态', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(object_turn)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='saddlebrown', label='转向灯状态', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_object_speedLon(self):
@@ -1301,8 +1453,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, object_speedLon, color='peachpuff', label='纵向相对运动速度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(object_speedLon)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='peachpuff', label='纵向相对运动速度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_object_speedLat(self):
@@ -1324,8 +1479,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, object_speedLat, color='sandybrown', label='横向相对运动速度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(object_speedLat)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='sandybrown', label='横向相对运动速度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_object_angle(self):
@@ -1347,8 +1505,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, object_angle, color='bisque', label='车头朝向', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(object_angle)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='bisque', label='车头朝向', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_object_confidence(self):
@@ -1370,8 +1531,12 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, object_confidence, color='burlywood', label='目标可信度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(object_confidence)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='burlywood', label='目标可信度', marker='.')
+        self.ax.legend(loc='best')
+        self.canvas.draw()
         self.canvas.draw()
 
     def camera_object_width(self):
@@ -1393,8 +1558,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, object_width, color='darkgoldenrod', label='目标宽度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(object_width)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='darkgoldenrod', label='目标宽度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_object_height(self):
@@ -1416,8 +1584,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, object_height, color='chartreuse', label='目标高度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(object_height)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='chartreuse', label='目标高度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def camera_object_length(self):
@@ -1439,8 +1610,11 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, object_length, color='dodgerblue', label='目标长度', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(object_length)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='dodgerblue', label='目标长度', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
 
     def draw_line(self):
@@ -2065,9 +2239,18 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.plt.plot(time, velocity, color='violet', label='车速', marker='.')
-        self.plt.legend(loc='best')
+        self.x = np.array(time)
+        self.y = np.array(velocity)
+        n = self.get_peaks(self.x, self.y, 500)
+        self.line, = self.ax.plot(n[0], n[1], color='violet', label='车速', marker='.')
+        self.ax.legend(loc='best')
         self.canvas.draw()
+        
+    def update_pltdata(self):
+        self.x0, self.x1 = self.ax.get_xlim()
+        n = self.get_peaks(self.x, self.y, 500, self.x0, self.x1)
+        self.line.set_data(n[0], n[1])
+        self.ax.figure.canvas.draw()
 
 
 def main():
