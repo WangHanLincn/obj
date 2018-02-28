@@ -1832,11 +1832,11 @@ class AppForm(QMainWindow):
                         self.textbox2.setText('%d ' % self.read_num)
                         time.sleep(0.04)
             if event_readed.channel == "camera":
-                time.sleep(0.001)
+                time.sleep(0.0005)
             if event_readed.channel == "ESR_REAR_WHOLE_DATA":
-                time.sleep(0.001)
+                time.sleep(0.0005)
             if event_readed.channel == "ESR_FRONT_WHOLE_DATA":
-                time.sleep(0.001)
+                time.sleep(0.0005)
         if self.v >= len(self.event_msg)-1:
             d = False
             self.textbox.setText('播放结束')
