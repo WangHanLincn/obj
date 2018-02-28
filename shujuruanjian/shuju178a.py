@@ -1626,6 +1626,15 @@ class AppForm(QMainWindow):
         self.reviewEdit.setText(' ')
 
     def draw_ESR(self):
+        self.x1 = []
+        self.y1 = []
+        self.x2 = []
+        self.y2 = []
+        self.line1, = self.plt1.plot(self.x1, self.y1, 'r.')
+        self.line2, = self.plt1.plot(self.x2, self.y2, 'r.')
+        self.plt1.set_xticks([-35, -25, -15, -5, 0, 5, 15, 25, 35])
+        self.plt1.set_yticks((-200, -120, -40, 0, 40, 120, 200))
+        self.canvas1.draw()
         self.s = 1
         self.slider.setRange(0, len(self.event_msg)-1)
         self.slider.setValue(0)
@@ -1682,26 +1691,32 @@ class AppForm(QMainWindow):
                 self.textbox2.setText('%d ' % self.t)
 
     def show_ESR(self):
-        x = []
-        y = []
-        t = self.t
+         t = self.t
         if t < len(self.event_msg):
             self.log.seek(self.event_msg[t - 1][2])
             event_readed = self.log.next()
             if event_readed.channel == "ESR_REAR_WHOLE_DATA":
+                self.x1 = []
+                self.y1 = []
                 msg = lcmtypes.objects_t.decode(event_readed.data)
                 objects = msg.objects
                 for obj in objects:
-                    x.append(obj.x)
-                    y.append(obj.y)
-                self.plt1.clear()
-                self.plt1.plot(x, y, 'r.')
-                self.plt1.set_xticks([-35, -25, -15, -5, 0, 5, 15, 25, 35])
-                self.plt1.set_yticks((-200, -160, -120, -80, -40, 0))
-                self.canvas1.draw()
-                self.reviewEdit.setText('目标个数：%d 个' % msg.object_number)
-                self.textbox2.setText('%d' % self.t)
-
+                    self.x1.append(obj.x)
+                    self.y1.append(obj.y)
+                self.line1.set_data(self.x1, self.y1)
+            if event_readed.channel == "ESR_FRONT_WHOLE_DATA":
+                self.x2 = []
+                self.y2 = []
+                msg = lcmtypes.objects_t.decode(event_readed.data)
+                objects = msg.objects
+                for obj in objects:
+                    self.x2.append(obj.x)
+                    self.y2.append(obj.y)
+                self.line2.set_data(self.x2, self.y2)
+            self.canvas1.draw()
+            self.reviewEdit.setText('目标个数：%d 个' % msg.object_number)
+            self.textbox2.setText('%d' % self.t)
+            
     def point(self):
         time_num = list(map(int, self.textbox2.text().split()))
         self.read_num = time_num[0]
@@ -1754,6 +1769,9 @@ class AppForm(QMainWindow):
         else:
             if event_readed.channel == "ESR_REAR_WHOLE_DATA":
                 self.number_E = self.number_E + 1
+                if self.number_E % 10 == 0:
+                    self.show_ESR()
+            if event_readed.channel == "ESR_FRONT_WHOLE_DATA":
                 if self.number_E % 10 == 0:
                     self.show_ESR()
     # 接收信号更新回放图像
@@ -1816,6 +1834,8 @@ class AppForm(QMainWindow):
             if event_readed.channel == "camera":
                 time.sleep(0.001)
             if event_readed.channel == "ESR_REAR_WHOLE_DATA":
+                time.sleep(0.001)
+            if event_readed.channel == "ESR_FRONT_WHOLE_DATA":
                 time.sleep(0.001)
         if self.v >= len(self.event_msg)-1:
             d = False
@@ -1968,6 +1988,8 @@ class AppForm(QMainWindow):
                     time.sleep(0.001)
                 if event_readed.channel == "ESR_REAR_WHOLE_DATA":
                     time.sleep(0.001)
+                if event_readed.channel == "ESR_FRONT_WHOLE_DATA":
+                    time.sleep(0.001)
             if self.numb == 100:
                 h = False
                 self.slider.setValue(self.read_num)
@@ -2005,6 +2027,8 @@ class AppForm(QMainWindow):
                 if event_readed.channel == "camera":
                     time.sleep(0.001)
                 if event_readed.channel == "ESR_REAR_WHOLE_DATA":
+                    time.sleep(0.001)
+                if event_readed.channel == "ESR_FRONT_WHOLE_DATA":
                     time.sleep(0.001)
             if self.numb == 100:
                 h = False
@@ -2075,10 +2099,6 @@ class AppForm(QMainWindow):
         a.write('')
         a.close
 
-        b = open('esr_msg.txt', 'a+')
-        b.write('')
-        b.close
-
         e = open('camera_object_msg.txt', 'a+')
         e.write('')
         e.close
@@ -2114,7 +2134,6 @@ class AppForm(QMainWindow):
         n = open('speed_cmd.txt', 'a+')
         g = open('vehicle_status.txt', 'a+')
         a = open('gps_data.txt', 'a+')
-        b = open('esr_msg.txt', 'a+')
         e = open('camera_object_msg.txt', 'a+')
         for event in self.log:
             self.pbar.setValue(event.eventnum)
@@ -2184,15 +2203,6 @@ class AppForm(QMainWindow):
                 a.write(str(msg.confidenceLevel) + ' ')
                 a.write(str(msg.satelliteNumber) + '\n')
 
-            if event.channel == "ESR_REAR_WHOLE_DATA":
-                msg = lcmtypes.objects_t.decode(event.data)
-                b.write(str(msg.object_number) + ' ')
-                objects = msg.objects
-                for obj in objects:
-                    b.write(str(obj.x) + ' ')
-                    b.write(str(obj.y) + ' ')
-                    b.write(str(obj.angle) + '\n')
-
             if event.channel == "camera":
                 msg = lcmtypes.camera_info_t.decode(event.data)
                 objects = msg.objects
@@ -2217,7 +2227,6 @@ class AppForm(QMainWindow):
         n.close
         g.close
         a.close
-        b.close
         e.close
         self.textbox.setText('数据读取完毕')
 
