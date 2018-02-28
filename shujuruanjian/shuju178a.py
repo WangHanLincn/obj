@@ -1143,7 +1143,7 @@ class AppForm(QMainWindow):
         f.close
         self.x = np.array(latitude)
         self.y = np.array(longittude)
-        n = self.get_peaks(self.x, self.y, 500)
+        n = self.get_peaks(self.y, self.x, 500)
         self.line, = self.ax.plot(n[0], n[1], color='seagreen', label='经纬度', marker='.')
         self.ax.legend(loc='best')
         self.canvas.draw()
