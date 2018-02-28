@@ -1063,7 +1063,7 @@ class AppForm(QMainWindow):
             else:
                 done = 1
         f.close
-        self.pltself.x = np.array(time)
+        self.x = np.array(time)
         self.y = np.array(locationStatus)
         n = self.get_peaks(self.x, self.y, 500)
         self.line, = self.ax.plot(n[0], n[1], color='tomato', label='定位模式', marker='.')
