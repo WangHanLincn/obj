@@ -1697,7 +1697,7 @@ class AppForm(QMainWindow):
                 self.plt1.clear()
                 self.plt1.plot(x, y, 'r.')
                 self.plt1.set_xticks([-35, -25, -15, -5, 0, 5, 15, 25, 35])
-                self.plt1.set_yticks((-100, -80, -60, -40, -20, 0))
+                self.plt1.set_yticks((-200, -160, -120, -80, -40, 0))
                 self.canvas1.draw()
                 self.reviewEdit.setText('目标个数：%d 个' % msg.object_number)
                 self.textbox2.setText('%d' % self.t)
