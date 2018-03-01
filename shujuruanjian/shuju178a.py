@@ -99,11 +99,11 @@ class AppForm(QMainWindow):
     def create_main_frame(self):
         self.main_frame = QWidget()
 
-        self.dpi = 100
+         self.dpi = 100
         self.fig = plt.figure(None, (6.5, 3.0), dpi=self.dpi)
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setParent(self.main_frame)
-        self.fig1 = Figure((6.5, 3.0), dpi=self.dpi)
+        self.fig1 = plt.figure(None, (6.5, 3.0), dpi=self.dpi)
         self.canvas1 = FigureCanvas(self.fig1)
         self.canvas1.setParent(self.main_frame)
         self.label_2 = QLabel(self)
@@ -128,8 +128,6 @@ class AppForm(QMainWindow):
 
         self.ax = self.fig.add_subplot(111)
         self.plt1 = self.fig1.add_subplot(111)
-        self.plt1.set_xticks([-15, -10, -5, 0, 5, 10, 15])
-        self.plt1.set_yticks((0, 20, 40, 60, 80, 100))
 
         self.canvas.mpl_connect('pick_event', self.on_pick)
         self.mpl_toolbar = NavigationToolbar(self.canvas, self.main_frame)
@@ -1634,8 +1632,7 @@ class AppForm(QMainWindow):
         self.y2 = []
         self.line1, = self.plt1.plot(self.x1, self.y1, 'r.')
         self.line2, = self.plt1.plot(self.x2, self.y2, 'r.')
-        self.plt1.set_xticks([-35, -25, -15, -5, 0, 5, 15, 25, 35])
-        self.plt1.set_yticks((-200, -120, -40, 0, 40, 120, 200))
+        self.plt1.axis([-15, 15, -150, 150])
         self.canvas1.draw()
         self.s = 1
         self.slider.setRange(0, len(self.event_msg)-1)
@@ -1684,8 +1681,7 @@ class AppForm(QMainWindow):
                 self.plt1.plot(0, 0, 'r.', label='本车')
                 self.plt1.plot(Yl, Xl, color='yellow', label='左车道线', marker='.')
                 self.plt1.plot(Yr,Xr, color='g', label='右车道线', marker='.')
-                self.plt1.set_xticks([-35, -25, -15, -5, 0, 5, 15, 25, 35])
-                self.plt1.set_yticks((0, 20, 40, 60, 80, 100))
+                self.plt1.axis([-15, 15, -150, 150])
                 self.plt1.legend(loc='best')
                 self.canvas1.draw()
                 self.reviewEdit.setText('左车道线识别长度为：%f m\n右车道线识别长度为：%f m\n时间：%d'
