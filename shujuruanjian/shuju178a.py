@@ -232,6 +232,8 @@ class AppForm(QMainWindow):
         self.Button63.setMaximumWidth(250)
         self.Button64 = QPushButton("更新图像")
         self.Button64.setMaximumWidth(250)
+        self.Button65 = QPushButton("精确到当前时间")
+        self.Button65.setMaximumWidth(250)
 
         self.text_browser_1.clicked.connect(self.SPEED_CMD_aim_spe)
         self.text_browser_2.clicked.connect(self.SPEED_CMD_mode)
@@ -295,6 +297,7 @@ class AppForm(QMainWindow):
         self.Button62.clicked.connect(self.step_up)
         self.Button63.clicked.connect(self.step_donw)
         self.Button64.clicked.connect(self.update_pltdata)
+        self.Button65.clicked.connect(self.ax_point)
 
         vbox1 = QVBoxLayout()
         vbox1.addWidget(self.mpl_toolbar)
@@ -328,6 +331,7 @@ class AppForm(QMainWindow):
         vbox2.addWidget(self.tab1)
         vbox2.addWidget(self.fileButton)
         vbox2.addWidget(self.Button64)
+        vbox2.addWidget(self.Button65)
         vbox2.addWidget(self.Button32)
         vbox2.addWidget(self.Button38)
         vbox2.addWidget(self.Button41)
@@ -2258,6 +2262,14 @@ class AppForm(QMainWindow):
         n = self.get_peaks(self.x, self.y, 500, self.x0, self.x1)
         self.line.set_data(n[0], n[1])
         self.ax.figure.canvas.draw()
+        
+    def ax_point(self):
+        self.t = self.read_num
+        self.log.seek(self.event_msg[self.t - 1][2])
+        event_readed = self.log.next()
+        y0, y1 = self.ax.get_ylim()
+        self.ax.axis([event_readed.timestamp-5000000, event_readed.timestamp+5000000, y0, y1])
+        self.canvas.draw()
 
 
 def main():
