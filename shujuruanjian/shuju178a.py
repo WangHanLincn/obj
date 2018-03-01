@@ -70,8 +70,6 @@ class AppForm(QMainWindow):
     def clear(self):
         self.ax.clear()
         self.canvas.draw()
-        self.plt1.clear()
-        self.canvas1.draw()
 
     def get_peaks(self, x, y, n, x0=None, x1=None):
         if x0 is None:
@@ -1618,6 +1616,8 @@ class AppForm(QMainWindow):
         self.canvas.draw()
 
     def draw_line(self):
+        self.plt1.clear()
+        self.canvas1.draw()
         self.s = 0
         self.slider.setRange(0, len(self.event_msg)-1)
         self.slider.setValue(0)
@@ -1626,6 +1626,8 @@ class AppForm(QMainWindow):
         self.reviewEdit.setText(' ')
 
     def draw_ESR(self):
+        self.plt1.clear()
+        self.canvas1.draw()
         self.x1 = []
         self.y1 = []
         self.x2 = []
