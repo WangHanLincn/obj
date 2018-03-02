@@ -2259,7 +2259,8 @@ class AppForm(QMainWindow):
         
     def update_pltdata(self):
         self.x0, self.x1 = self.ax.get_xlim()
-        n = self.get_peaks(self.x, self.y, 500, self.x0, self.x1)
+        cha = self.x1 - self.x0
+        n = self.get_peaks(self.x, self.y, 500, self.x0-cha, self.x1+cha)
         self.line.set_data(n[0], n[1])
         self.ax.figure.canvas.draw()
         
