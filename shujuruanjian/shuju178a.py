@@ -1662,6 +1662,7 @@ class AppForm(QMainWindow):
         if t < len(self.event_msg):
             self.log.seek(self.event_msg[t - 1][2])
             event_readed = self.log.next()
+            utime = event_readed.timestamp
             if event_readed.channel == "ESR_REAR_WHOLE_DATA":
                 self.x1 = []
                 self.y1 = []
@@ -1681,7 +1682,7 @@ class AppForm(QMainWindow):
                     self.y2.append(obj.y)
                 self.line2.set_data(self.x2, self.y2)
             self.canvas1.draw()
-            self.reviewEdit2.setText('ESR数据:\n目标个数：%d 个' % msg.object_number)
+            self.reviewEdit2.setText('ESR数据:\n目标个数：%d 个\n时间戳：%d ' % (msg.object_number, utime))
             self.textbox2.setText('%d' % self.t)
             
     def point(self):
