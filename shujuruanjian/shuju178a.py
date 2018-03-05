@@ -179,7 +179,7 @@ class AppForm(QMainWindow):
         self.text_browser_20 = QPushButton("航向角")
         self.text_browser_21 = QPushButton("翻滚角")
         self.text_browser_22 = QPushButton("俯仰角")
-        self.text_browser_23 = QPushButton("横摆角速度")
+        self.text_browser_23 = QPushButton("横摆角速度GPS")
         self.text_browser_24 = QPushButton("北向车速")
         self.text_browser_25 = QPushButton("东向车速")
         self.text_browser_26 = QPushButton("垂直地面速度")
@@ -959,7 +959,7 @@ class AppForm(QMainWindow):
         self.x = np.array(time)
         self.y = np.array(yawRate)
         n = self.get_peaks(self.x, self.y, 500)
-        self.line, = self.ax.plot(n[0], n[1], color='navy', label='横摆角速度', marker='.')
+        self.line, = self.ax.plot(n[0], n[1], color='navy', label='横摆角速度GPS', marker='.')
         self.ax.legend(loc='best')
         self.canvas.draw()
 
