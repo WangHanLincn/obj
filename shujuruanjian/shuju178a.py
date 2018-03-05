@@ -15,7 +15,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
-from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 
@@ -137,8 +136,10 @@ class AppForm(QMainWindow):
         self.slider.setMaximumWidth(600)
         self.slider_label = QLabel('时间戳编号：')
         self.slider_label.setMaximumWidth(100)
-        self.reviewEdit = QTextEdit()
-        self.reviewEdit.setMaximumSize(QtCore.QSize(850,190))
+        self.reviewEdit1 = QTextEdit()
+        self.reviewEdit1.setMaximumSize(QtCore.QSize(420,190))
+        self.reviewEdit2 = QTextEdit()
+        self.reviewEdit2.setMaximumSize(QtCore.QSize(420, 190))
         self.slidervaluechange.connect(self.sliderValuechange)
         self.pbar = QProgressBar(self)
         self.pbar.setMaximumWidth(250)
@@ -206,10 +207,6 @@ class AppForm(QMainWindow):
         self.text_browser_52 = QPushButton("目标长度")
         self.Button32 = QPushButton("清除图像")
         self.Button32.setMaximumWidth(250)
-        self.Button38 = QPushButton("视觉回放")
-        self.Button38.setMaximumWidth(250)
-        self.Button41 = QPushButton("ESR数据回放")
-        self.Button41.setMaximumWidth(250)
         self.Button54 = QPushButton("定位当前时间戳编号")
         self.Button54.setMaximumWidth(250)
         self.Button55 = QPushButton("视频回放")
@@ -284,8 +281,6 @@ class AppForm(QMainWindow):
         self.text_browser_51.clicked.connect(self.camera_object_height)
         self.text_browser_52.clicked.connect(self.camera_object_length)
         self.Button32.clicked.connect(self.clear)
-        self.Button38.clicked.connect(self.draw_line)
-        self.Button41.clicked.connect(self.draw_ESR)
         self.Button54.clicked.connect(self.point)
         self.Button55.clicked.connect(self.show_image)
         self.Button56.clicked.connect(self.pause)
@@ -333,8 +328,6 @@ class AppForm(QMainWindow):
         vbox2.addWidget(self.Button64)
         vbox2.addWidget(self.Button65)
         vbox2.addWidget(self.Button32)
-        vbox2.addWidget(self.Button38)
-        vbox2.addWidget(self.Button41)
         vbox2.addWidget(self.textbox)
         vbox2.addWidget(self.Button54)
         vbox2.addWidget(self.pbar)
@@ -355,6 +348,10 @@ class AppForm(QMainWindow):
         hbox5.addWidget(self.Button60)
         hbox5.addWidget(self.Button59)
         hbox5.addWidget(self.Button62)
+        
+        hbox6 = QHBoxLayout()
+        hbox6.addWidget(self.reviewEdit1)
+        hbox6.addWidget(self.reviewEdit2)
 
         hbox1 = QHBoxLayout()
         hbox1.addWidget(self.label_2)
@@ -366,7 +363,7 @@ class AppForm(QMainWindow):
         vbox3.addLayout(hbox4)
         vbox3.addLayout(hbox3)
         vbox3.addLayout(hbox5)
-        vbox3.addWidget(self.reviewEdit)
+        vbox3.addLayout(hbox6)
 
         hbox = QHBoxLayout()
         hbox.addLayout(vbox1)
@@ -1371,7 +1368,6 @@ class AppForm(QMainWindow):
 
                 if len(a) == 14:
                     object_type.append(float(a[4]))
-
             else:
                 done = 1
         f.close
@@ -1617,37 +1613,9 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
 
-    def draw_line(self):
-        self.plt1.clear()
-        self.canvas1.draw()
-        self.s = 0
-        self.slider.setRange(0, len(self.event_msg)-1)
-        self.slider.setValue(0)
-        self.slider.setTracking(True)
-        self.slider.setTickPosition(QSlider.TicksBothSides)
-        self.reviewEdit.setText(' ')
-
-    def draw_ESR(self):
-        self.plt1.clear()
-        self.canvas1.draw()
-        self.x1 = []
-        self.y1 = []
-        self.x2 = []
-        self.y2 = []
-        self.line1, = self.plt1.plot(self.x1, self.y1, 'r.')
-        self.line2, = self.plt1.plot(self.x2, self.y2, 'r.')
-        self.plt1.axis([-15, 15, -150, 150])
-        self.canvas1.draw()
-        self.s = 1
-        self.slider.setRange(0, len(self.event_msg)-1)
-        self.slider.setValue(0)
-        self.slider.setTracking(True)
-        self.slider.setTickPosition(QSlider.TicksBothSides)
-        self.reviewEdit.setText(' ')
-
     def show_camera(self):
-        x = []
-        y = []
+        self.xc = []
+        self.yc = []
         t = self.t
         if t < len(self.event_msg):
             self.log.seek(self.event_msg[t - 1][2])
@@ -1666,30 +1634,27 @@ class AppForm(QMainWindow):
                 cr = msg.lines[2].c
                 dr = msg.lines[2].d
                 for obj in objects:
-                    x.append(obj.centerPoint.x)
-                    y.append(obj.centerPoint.y)
+                    self.xc.append(obj.centerPoint.x)
+                    self.yc.append(obj.centerPoint.y)
                 if i == 0.0:
-                    Xl = 0
-                    Yl = 0
-                    Xr = 0
-                    Yr = 0
+                    self.Xl = []
+                    self.Yl = []
+                    self.Xr = []
+                    self.Yr = []
                 else:
                     m = np.arange(i)
-                    Xl = m
-                    Yl = al + bl * m + cl * (m ** 2) + dl * (m ** 3)
+                    self.Xl = m
+                    self.Yl = al + bl * m + cl * (m ** 2) + dl * (m ** 3)
                     n = np.arange(j)
-                    Xr = n
-                    Yr = ar + br * n + cr * (n ** 2) + dr * (n ** 3)
-                self.plt1.clear()
-                self.plt1.plot(x, y, 'b.', label='视觉目标')
-                self.plt1.plot(0, 0, 'r.', label='本车')
-                self.plt1.plot(Yl, Xl, color='yellow', label='左车道线', marker='.')
-                self.plt1.plot(Yr,Xr, color='g', label='右车道线', marker='.')
-                self.plt1.axis([-15, 15, -150, 150])
-                self.plt1.legend(loc='best')
+                    self.Xr = n
+                    self.Yr = ar + br * n + cr * (n ** 2) + dr * (n ** 3)
+                self.line3.set_data(self.xc, self.yc)
+                self.line4.set_data(self.Yl, self.Xl)
+                self.line5.set_data(self.Yr, self.Xr)
+                # self.plt1.legend(loc='best')
                 self.canvas1.draw()
-                self.reviewEdit.setText('左车道线识别长度为：%f m\n右车道线识别长度为：%f m\n时间：%d'
-                                        % (msg.lines[1].length, msg.lines[2].length, msg.utime))
+                self.reviewEdit1.setText('左车道线识别长度为：%f m\n右车道线识别长度为：%f m\n时间：%d'
+                                    % (msg.lines[1].length, msg.lines[2].length, msg.utime))
                 self.textbox2.setText('%d ' % self.t)
 
     def show_ESR(self):
@@ -1716,7 +1681,7 @@ class AppForm(QMainWindow):
                     self.y2.append(obj.y)
                 self.line2.set_data(self.x2, self.y2)
             self.canvas1.draw()
-            self.reviewEdit.setText('目标个数：%d 个' % msg.object_number)
+            self.reviewEdit2.setText('ESR数据:\n目标个数：%d 个' % msg.object_number)
             self.textbox2.setText('%d' % self.t)
             
     def point(self):
@@ -1763,19 +1728,16 @@ class AppForm(QMainWindow):
         self.t = self.read_num
         self.log.seek(self.event_msg[self.t - 1][2])
         event_readed = self.log.next()
-        if self.s == 0:
-            if event_readed.channel == "camera":
-                self.number_c = self.number_c + 1
-                if self.number_c % 2 == 0:
-                    self.show_camera()
-        else:
-            if event_readed.channel == "ESR_REAR_WHOLE_DATA":
-                self.number_E = self.number_E + 1
-                if self.number_E % 10 == 0:
-                    self.show_ESR()
-            if event_readed.channel == "ESR_FRONT_WHOLE_DATA":
-                if self.number_E % 10 == 0:
-                    self.show_ESR()
+        if event_readed.channel == "camera":
+            # self.number_c = self.number_c + 1
+            # if self.number_c % 2 == 0:
+            self.show_camera()
+        elif event_readed.channel == "ESR_REAR_WHOLE_DATA":
+            self.show_ESR()
+        elif event_readed.channel == "ESR_FRONT_WHOLE_DATA":
+            # self.number_E = self.number_E + 1
+            # if self.number_E % 5 == 0:
+            self.show_ESR()
     # 接收信号更新回放图像
 
     def add_actions(self, target, actions):
@@ -2256,6 +2218,32 @@ class AppForm(QMainWindow):
         self.line, = self.ax.plot(n[0], n[1], color='violet', label='车速', marker='.')
         self.ax.legend(loc='best')
         self.canvas.draw()
+        
+        self.plt1.clear()
+        self.canvas1.draw()
+        self.x1 = []
+        self.y1 = []
+        self.x2 = []
+        self.y2 = []
+        self.xc = []
+        self.yc = []
+        self.Yl = []
+        self.Xl = []
+        self.Yr = []
+        self.Xr = []
+        self.line1, = self.plt1.plot(self.x1, self.y1, 'rx', label='ESR目标')
+        self.line2, = self.plt1.plot(self.x2, self.y2, 'rx')
+        self.line3, = self.plt1.plot(self.xc, self.yc, 'b.', label='视觉目标')
+        self.plt1.plot(0, 0, 'r.', label='本车')
+        self.line4, = self.plt1.plot(self.Yl, self.Xl, color='yellow', label='左车道线', marker='.')
+        self.line5, = self.plt1.plot(self.Yr, self.Xr, color='g', label='右车道线', marker='.')
+        self.plt1.legend(loc='best')
+        self.plt1.axis([-15, 15, -150, 150])
+        self.canvas1.draw()
+        self.slider.setRange(0, len(self.event_msg) - 1)
+        self.slider.setValue(0)
+        self.slider.setTracking(True)
+        self.slider.setTickPosition(QSlider.TicksBothSides)
         
     def update_pltdata(self):
         self.x0, self.x1 = self.ax.get_xlim()
