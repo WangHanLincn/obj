@@ -1641,20 +1641,39 @@ class AppForm(QMainWindow):
                     self.Yl = []
                     self.Xr = []
                     self.Yr = []
+                    self.Xll = []
+                    self.Yll = []
+                    self.Xrr = []
+                    self.Yrr = []
+                    self.Xc = []
+                    self.Yc = []
                 else:
                     m = np.arange(i)
                     self.Xl = m
                     self.Yl = al + bl * m + cl * (m ** 2) + dl * (m ** 3)
+                    ml = np.arange(il)
+                    self.Xll = ml
+                    self.Yll = all + bll * ml + cll * (ml ** 2) + dll * (ml ** 3)
                     n = np.arange(j)
                     self.Xr = n
                     self.Yr = ar + br * n + cr * (n ** 2) + dr * (n ** 3)
+                    nr = np.arange(jr)
+                    self.Xrr = nr
+                    self.Yrr = arr + brr * nr + crr * (nr ** 2) + drr * (nr ** 3)
+                    mc = np.arange(c)
+                    self.Xc = mc
+                    self.Yc = ac + bc * mc + cc * (mc ** 2) + dc * (mc ** 3)
                 self.line3.set_data(self.xc, self.yc)
                 self.line4.set_data(self.Yl, self.Xl)
                 self.line5.set_data(self.Yr, self.Xr)
+                self.line6.set_data(self.Yll, self.Xll)
+                self.line7.set_data(self.Yrr, self.Xrr)
+                self.line8.set_data(self.Yc, self.Xc)
                 # self.plt1.legend(loc='best')
                 self.canvas1.draw()
-                self.reviewEdit1.setText('左车道线识别长度为：%f m\n右车道线识别长度为：%f m\n时间：%d'
-                                    % (msg.lines[1].length, msg.lines[2].length, msg.utime))
+                self.reviewEdit1.setText('左车道线识别长度为：%f m\n右车道线识别长度为：%f m\n左外侧车道线识别长度为：%f m\n'
+                                         '右外侧车道线识别长度为：%f m\n中心线识别长度为：%f m\n时间：%d'
+                                    % (msg.lines[1].length, msg.lines[2].length, msg.lines[0].length, msg.lines[3].length, msg.center_line.length, msg.utime))
                 self.textbox2.setText('%d ' % self.t)
 
     def show_ESR(self):
@@ -2232,12 +2251,21 @@ class AppForm(QMainWindow):
         self.Xl = []
         self.Yr = []
         self.Xr = []
+        self.Yll = []
+        self.Xll = []
+        self.Yrr = []
+        self.Xrr = []
+        self.Yc = []
+        self.Xc = []
         self.line1, = self.plt1.plot(self.x1, self.y1, 'rx', label='ESR目标')
         self.line2, = self.plt1.plot(self.x2, self.y2, 'rx')
         self.line3, = self.plt1.plot(self.xc, self.yc, 'b.', label='视觉目标')
         self.plt1.plot(0, 0, 'r.', label='本车')
         self.line4, = self.plt1.plot(self.Yl, self.Xl, color='yellow', label='左车道线', marker='.')
         self.line5, = self.plt1.plot(self.Yr, self.Xr, color='g', label='右车道线', marker='.')
+        self.line6, = self.plt1.plot(self.Yll, self.Xll, color='coral', label='左外侧车道线', marker='.')
+        self.line7, = self.plt1.plot(self.Yrr, self.Xrr, color='m', label='右外侧车道线', marker='.')
+        self.line8, = self.plt1.plot(self.Yc, self.Xc, color='c', label='中心线', marker='.')
         self.plt1.legend(loc='best')
         self.plt1.axis([-15, 15, -150, 150])
         self.canvas1.draw()
