@@ -69,8 +69,6 @@ class AppForm(QMainWindow):
     def clear(self):
         self.ax.clear()
         self.canvas.draw()
-        self.ax1.clear()
-        self.canvas2.draw()
 
     def get_peaks(self, x, y, n, x0=None, x1=None):
         if x0 is None:
@@ -2514,8 +2512,11 @@ class AppForm(QMainWindow):
         self.x0, self.x1 = self.ax.get_xlim()
         cha = self.x1 - self.x0
         n = self.get_peaks(self.x, self.y, 500, self.x0-cha, self.x1+cha)
+        self.x2, self.x3 = self.ax1.get_xlim()
+        cha1 = self.x3 - self.x2
+        n1 = self.get_peaks(self.x, self.y, 500, self.x2 - cha1, self.x3 + cha1)
         self.line.set_data(n[0], n[1])
-        self.line_1.set_data(n[0], n[1])
+        self.line_1.set_data(n1[0], n1[1])
         self.ax.figure.canvas.draw()
         self.ax1.figure.canvas.draw()
         
@@ -2523,9 +2524,7 @@ class AppForm(QMainWindow):
         self.t = self.read_num
         self.log.seek(self.event_msg[self.t - 1][2])
         event_readed = self.log.next()
-        y0, y1 = self.ax.get_ylim()
-        self.ax.axis([event_readed.timestamp-5000000, event_readed.timestamp+5000000, y0, y1])
-        self.canvas.draw()
+        y0, y1 = self.ax1.get_ylim()
         self.ax1.axis([event_readed.timestamp - 5000000, event_readed.timestamp + 5000000, y0, y1])
         self.canvas2.draw()
 
