@@ -2213,6 +2213,7 @@ class AppForm(QMainWindow):
         a.close
         e.close
         self.textbox.setText('数据读取完毕')
+        self.pbar.setValue(self.o[0])
 
         f = open('gps_data.txt', 'r')
         time = []
