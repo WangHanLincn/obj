@@ -1844,6 +1844,23 @@ class AppForm(QMainWindow):
             self.reviewEdit2.setText('ESR数据:\n后方目标个数：%d 个\n前方目标个数：%d 个\n时间戳：%d ' % (self.be, self.fe, utime))
             self.textbox2.setText('%d' % self.t)
             
+    def show_lidar_obj(self):
+        t = self.t
+        if t < len(self.event_msg):
+            self.XL = []
+            self.YL = []
+            self.log.seek(self.event_msg[t - 1][2])
+            event_readed = self.log.next()
+            if event_readed.channel == "LIDAR_OBJECT_SIDE":
+                msg = lcmtypes.lidar_object_t.decode(event_readed.data)
+                self.XL.append(msg.leftObject.objectCenterPosition.x)
+                self.YL.append(msg.leftObject.objectCenterPosition.y)
+                self.XL.append(msg.rightObject.objectCenterPosition.x)
+                self.YL.append(msg.rightObject.objectCenterPosition.y)
+            self.line9.set_data(self.XL, self.YL)
+            self.canvas1.draw()
+            self.textbox2.setText('%d' % t)
+            
     def point(self):
         time_num = list(map(int, self.textbox2.text().split()))
         self.read_num = time_num[0]
@@ -1898,6 +1915,8 @@ class AppForm(QMainWindow):
             # self.number_E = self.number_E + 1
             # if self.number_E % 5 == 0:
             self.show_ESR()
+        elif event_readed.channel == "LIDAR_OBJECT_SIDE":
+            self.show_lidar_obj()
     # 接收信号更新回放图像
 
     def add_actions(self, target, actions):
@@ -1960,6 +1979,8 @@ class AppForm(QMainWindow):
             elif event_readed.channel == "ESR_REAR_WHOLE_DATA":
                 time.sleep(0.0005)
             elif event_readed.channel == "ESR_FRONT_WHOLE_DATA":
+                time.sleep(0.0005)
+            elif event_readed.channel == "LIDAR_OBJECT_SIDE":
                 time.sleep(0.0005)
         if self.v >= len(self.event_msg)-1:
             d = False
@@ -2114,6 +2135,8 @@ class AppForm(QMainWindow):
                     time.sleep(0.001)
                 elif event_readed.channel == "ESR_FRONT_WHOLE_DATA":
                     time.sleep(0.001)
+                elif event_readed.channel == "LIDAR_OBJECT_SIDE":
+                    time.sleep(0.001)
             if self.numb == 100:
                 h = False
                 self.slider.setValue(self.read_num)
@@ -2153,6 +2176,8 @@ class AppForm(QMainWindow):
                 elif event_readed.channel == "ESR_REAR_WHOLE_DATA":
                     time.sleep(0.001)
                 elif event_readed.channel == "ESR_FRONT_WHOLE_DATA":
+                    time.sleep(0.001)
+                elif event_readed.channel == "LIDAR_OBJECT_SIDE":
                     time.sleep(0.001)
             if self.numb == 100:
                 h = False
@@ -2395,6 +2420,8 @@ class AppForm(QMainWindow):
         self.Xrr = []
         self.Yc = []
         self.Xc = []
+        self.XL = []
+        self.YL = []
         self.line1, = self.plt1.plot(self.x1, self.y1, 'rx', label='ESR目标')
         self.line2, = self.plt1.plot(self.x2, self.y2, 'rx')
         self.line3, = self.plt1.plot(self.xc, self.yc, 'b.', label='视觉目标')
@@ -2404,6 +2431,7 @@ class AppForm(QMainWindow):
         self.line6, = self.plt1.plot(self.Yll, self.Xll, color='coral', label='左外侧车道线', marker='.')
         self.line7, = self.plt1.plot(self.Yrr, self.Xrr, color='m', label='右外侧车道线', marker='.')
         self.line8, = self.plt1.plot(self.Yc, self.Xc, color='c', label='中心线', marker='.')
+        self.line9, = self.plt1.plot(self.XL, self.YL, 'kp', label='16线目标')
         self.plt1.legend(loc='best')
         self.plt1.axis([-20, 20, -150, 150])
         self.canvas1.draw()
