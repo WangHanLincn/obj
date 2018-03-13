@@ -2284,6 +2284,7 @@ class AppForm(QMainWindow):
         g = open('vehicle_status.txt', 'a+')
         a = open('gps_data.txt', 'a+')
         e = open('camera_object_msg.txt', 'a+')
+        self.event_msg = []
         for event in self.log:
             self.pbar.setValue(event.eventnum)
             msg = [event.eventnum, event.timestamp, self.log.tell()]
