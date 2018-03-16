@@ -814,6 +814,7 @@ class AppForm(QMainWindow):
         self.canvas2.draw()
 
     def VEHICLE_STATUS_yawRate(self):
+        self.ax1.clear()
         f = open('vehicle_status.txt', 'r')
         time = []
         yawrate = []
