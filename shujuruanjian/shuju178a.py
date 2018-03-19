@@ -184,9 +184,7 @@ class AppForm(QMainWindow):
         self.text_browser_13 = QPushButton("挡位")
         self.text_browser_14 = QPushButton("左轮距离")
         self.text_browser_15 = QPushButton("右轮距离")
-        self.text_browser_16 = QPushButton("横摆角速度")
-        self.text_browser_17 = QPushButton("纵向加速度")
-        self.text_browser_18 = QPushButton("横向加速度")
+        self.text_browser_18 = QPushButton("加速度")
         self.text_browser_19 = QPushButton("车速")
         self.text_browser_20 = QPushButton("航向角")
         self.text_browser_21 = QPushButton("翻滚角")
@@ -259,8 +257,6 @@ class AppForm(QMainWindow):
         self.text_browser_13.clicked.connect(self.VEHICLE_STATUS_shift)
         self.text_browser_14.clicked.connect(self.VEHICLE_STATUS_disLeft)
         self.text_browser_15.clicked.connect(self.VEHICLE_STATUS_disRight)
-        self.text_browser_16.clicked.connect(self.VEHICLE_STATUS_yawRate)
-        self.text_browser_17.clicked.connect(self.VEHICLE_STATUS_accelerationLon)
         self.text_browser_18.clicked.connect(self.VEHICLE_STATUS_accelerationLat)
         self.text_browser_19.clicked.connect(self.GPS_DATA_velocity)
         self.text_browser_20.clicked.connect(self.GPS_DATA_yaw)
@@ -334,15 +330,15 @@ class AppForm(QMainWindow):
         for w in [ self.text_browser_1, self.text_browser_2, self.text_browser_3, self.text_browser_4,
                    self.text_browser_5, self.text_browser_6, self.text_browser_7, self.text_browser_8,
                    self.text_browser_9, self.text_browser_10, self.text_browser_11, self.text_browser_12,
-                   self.text_browser_13, self.text_browser_14, self.text_browser_15, self.text_browser_16,
-                   self.text_browser_17, self.text_browser_18, self.text_browser_19, self.text_browser_20,
-                   self.text_browser_21, self.text_browser_22, self.text_browser_23, self.text_browser_24,
-                   self.text_browser_25, self.text_browser_26, self.text_browser_27, self.text_browser_28,
-                   self.text_browser_29, self.text_browser_30, self.text_browser_31, self.text_browser_33,
-                   self.text_browser_34, self.text_browser_36, self.text_browser_37, self.text_browser_39,
-                   self.text_browser_40, self.text_browser_42, self.text_browser_43, self.text_browser_44,
-                   self.text_browser_45, self.text_browser_46, self.text_browser_47, self.text_browser_48,
-                   self.text_browser_49, self.text_browser_50, self.text_browser_51, self.text_browser_52]:
+                   self.text_browser_13, self.text_browser_14, self.text_browser_15, self.text_browser_18,
+                   self.text_browser_19, self.text_browser_20, self.text_browser_21, self.text_browser_22,
+                   self.text_browser_23, self.text_browser_24, self.text_browser_25, self.text_browser_26,
+                   self.text_browser_27, self.text_browser_28, self.text_browser_29, self.text_browser_30,
+                   self.text_browser_31, self.text_browser_33, self.text_browser_34, self.text_browser_36,
+                   self.text_browser_37, self.text_browser_39, self.text_browser_40, self.text_browser_42,
+                   self.text_browser_43, self.text_browser_44, self.text_browser_45, self.text_browser_46,
+                   self.text_browser_47, self.text_browser_48, self.text_browser_49, self.text_browser_50,
+                   self.text_browser_51, self.text_browser_52]:
             vbox.addWidget(w)
             vbox.setAlignment(w, Qt.AlignVCenter)
 
@@ -544,7 +540,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 11:
                     time.append(float(a[0]))
                     mode.append(int(a[1]))
 
@@ -572,7 +568,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 11:
                     time.append(float(a[0]))
                     steerPos.append(float(a[2]))
 
@@ -600,7 +596,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 11:
                     time.append(float(a[0]))
                     steerspe.append(float(a[3]))
 
@@ -628,7 +624,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 11:
                     time.append(float(a[0]))
                     light.append(float(a[4]))
 
@@ -656,7 +652,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 11:
                     time.append(float(a[0]))
                     speed.append(float(a[5]))
 
@@ -684,7 +680,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 11:
                     time.append(float(a[0]))
                     speed.append(float(a[6]))
 
@@ -712,7 +708,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 11:
                     time.append(float(a[0]))
                     vot.append(float(a[7]))
 
@@ -740,7 +736,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 11:
                     time.append(float(a[0]))
                     shift.append(float(a[8]))
 
@@ -768,7 +764,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 11:
                     time.append(float(a[0]))
                     dis.append(float(a[9]))
 
@@ -796,7 +792,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 11:
                     time.append(float(a[0]))
                     dis.append(float(a[10]))
 
@@ -813,65 +809,9 @@ class AppForm(QMainWindow):
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
-    def VEHICLE_STATUS_yawRate(self):
-        self.ax1.clear()
-        f = open('vehicle_status.txt', 'r')
-        time = []
-        yawrate = []
-        done = 0
-        while not done:
-            line = f.readline()
-            line = line.strip('\n')
-            if line != '':
-                a = line.split(' ')
-                if len(a) == 14:
-                    time.append(float(a[0]))
-                    yawrate.append(float(a[11]))
-
-            else:
-                done = 1
-        f.close
-        self.x = np.array(time)
-        self.y = np.array(yawrate)
-        n = self.get_peaks(self.x, self.y, 500)
-        self.line, = self.ax.plot(n[0], n[1], color='coral', label='横摆角速度', marker='.')
-        self.ax.legend(loc='best')
-        self.canvas.draw()
-        self.line_1, = self.ax1.plot(n[0], n[1], color='coral', label='横摆角速度', marker='.')
-        self.ax1.legend(loc='best')
-        self.canvas2.draw()
-
-    def VEHICLE_STATUS_accelerationLon(self):
-        self.ax1.clear()
-        f = open('vehicle_status.txt', 'r')
-        time = []
-        accelerationLon = []
-        done = 0
-        while not done:
-            line = f.readline()
-            line = line.strip('\n')
-            if line != '':
-                a = line.split(' ')
-                if len(a) == 14:
-                    time.append(float(a[0]))
-                    accelerationLon.append(float(a[12]))
-
-            else:
-                done = 1
-        f.close
-        self.x = np.array(time)
-        self.y = np.array(accelerationLon)
-        n = self.get_peaks(self.x, self.y, 500)
-        self.line, = self.ax.plot(n[0], n[1], color='peru', label='纵向加速度', marker='.')
-        self.ax.legend(loc='best')
-        self.canvas.draw()
-        self.line_1, = self.ax1.plot(n[0], n[1], color='peru', label='纵向加速度', marker='.')
-        self.ax1.legend(loc='best')
-        self.canvas2.draw()
-
     def VEHICLE_STATUS_accelerationLat(self):
         self.ax1.clear()
-        f = open('vehicle_status.txt', 'r')
+        f = open('gps_data.txt', 'r')
         time = []
         accelerationLat = []
         done = 0
@@ -880,9 +820,9 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 15:
                     time.append(float(a[0]))
-                    accelerationLat.append(float(a[13]))
+                    accelerationLat.append(float(a[14]))
 
             else:
                 done = 1
@@ -908,7 +848,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 15:
                     time.append(float(a[0]))
                     velocity.append(float(a[10]))
 
@@ -936,7 +876,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 15:
                     time.append(float(a[0]))
                     yaw.append(float(a[3]))
 
@@ -964,7 +904,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 15:
                     time.append(float(a[0]))
                     roll.append(float(a[4]))
 
@@ -992,7 +932,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 15:
                     time.append(float(a[0]))
                     pitch.append(float(a[5]))
 
@@ -1020,7 +960,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 15:
                     time.append(float(a[0]))
                     yawRate.append(float(a[6]))
 
@@ -1048,7 +988,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 15:
                     time.append(float(a[0]))
                     velocityNorth.append(float(a[7]))
 
@@ -1076,7 +1016,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 15:
                     time.append(float(a[0]))
                     velocityEast.append(float(a[8]))
 
@@ -1104,7 +1044,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 15:
                     time.append(float(a[0]))
                     velocityDown.append(float(a[9]))
 
@@ -1132,7 +1072,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 15:
                     time.append(float(a[0]))
                     locationStatus.append(float(a[11]))
 
@@ -1160,7 +1100,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 15:
                     time.append(float(a[0]))
                     confidenceLevel.append(float(a[12]))
 
@@ -1188,7 +1128,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 15:
                     time.append(float(a[0]))
                     satelliteNumber.append(float(a[13]))
 
@@ -1216,7 +1156,7 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 15:
                     latitude.append(float(a[2]))
                     longittude.append(float(a[1]))
 
@@ -2326,10 +2266,7 @@ class AppForm(QMainWindow):
                 g.write(str(msg.vot) + ' ')
                 g.write(str(msg.shift) + ' ')
                 g.write(str(msg.disLeft) + ' ')
-                g.write(str(msg.disRight) + ' ')
-                g.write(str(msg.yawRate) + ' ')
-                g.write(str(msg.accelerationLon) + ' ')
-                g.write(str(msg.accelerationLat) + '\n')
+                g.write(str(msg.disRight) + '\n')
 
             if event.channel == "GPS_DATA":
                 msg = lcmtypes.gps_imu_info_t.decode(event.data)
@@ -2346,7 +2283,8 @@ class AppForm(QMainWindow):
                 a.write(str(msg.velocity) + ' ')
                 a.write(str(msg.locationStatus) + ' ')
                 a.write(str(msg.confidenceLevel) + ' ')
-                a.write(str(msg.satelliteNumber) + '\n')
+                a.write(str(msg.satelliteNumber) + ' ')
+                a.write(str(msg.accelerationLongitudinal) + '\n')
 
             if event.channel == "camera":
                 msg = lcmtypes.camera_info_t.decode(event.data)
@@ -2383,10 +2321,10 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 14:
+                if len(a) == 15:
                     time.append(float(a[0]))
 
-                if len(a) == 14:
+                if len(a) == 15:
                     velocity.append(float(a[10]))
 
             else:
