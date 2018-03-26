@@ -184,7 +184,7 @@ class AppForm(QMainWindow):
         self.text_browser_13 = QPushButton("挡位")
         self.text_browser_14 = QPushButton("左轮距离")
         self.text_browser_15 = QPushButton("右轮距离")
-        self.text_browser_18 = QPushButton("加速度")
+        # self.text_browser_18 = QPushButton("加速度")
         self.text_browser_19 = QPushButton("车速")
         self.text_browser_20 = QPushButton("航向角")
         self.text_browser_21 = QPushButton("翻滚角")
@@ -257,7 +257,7 @@ class AppForm(QMainWindow):
         self.text_browser_13.clicked.connect(self.VEHICLE_STATUS_shift)
         self.text_browser_14.clicked.connect(self.VEHICLE_STATUS_disLeft)
         self.text_browser_15.clicked.connect(self.VEHICLE_STATUS_disRight)
-        self.text_browser_18.clicked.connect(self.VEHICLE_STATUS_accelerationLat)
+        # self.text_browser_18.clicked.connect(self.VEHICLE_STATUS_accelerationLat)
         self.text_browser_19.clicked.connect(self.GPS_DATA_velocity)
         self.text_browser_20.clicked.connect(self.GPS_DATA_yaw)
         self.text_browser_21.clicked.connect(self.GPS_DATA_roll)
@@ -330,7 +330,7 @@ class AppForm(QMainWindow):
         for w in [ self.text_browser_1, self.text_browser_2, self.text_browser_3, self.text_browser_4,
                    self.text_browser_5, self.text_browser_6, self.text_browser_7, self.text_browser_8,
                    self.text_browser_9, self.text_browser_10, self.text_browser_11, self.text_browser_12,
-                   self.text_browser_13, self.text_browser_14, self.text_browser_15, self.text_browser_18,
+                   self.text_browser_13, self.text_browser_14, self.text_browser_15, #self.text_browser_18,
                    self.text_browser_19, self.text_browser_20, self.text_browser_21, self.text_browser_22,
                    self.text_browser_23, self.text_browser_24, self.text_browser_25, self.text_browser_26,
                    self.text_browser_27, self.text_browser_28, self.text_browser_29, self.text_browser_30,
@@ -393,11 +393,13 @@ class AppForm(QMainWindow):
         self.setGeometry(50, 40, 1800, 980)
         self.setCentralWidget(self.main_frame)
 
-    def SPEED_CMD_aim_spe(self):
+        def SPEED_CMD_aim_spe(self):
         self.ax1.clear()
         f = open('speed_cmd.txt', 'r')
         aim_speed = []
         time = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -416,6 +418,7 @@ class AppForm(QMainWindow):
         n = self.get_peaks(self.x, self.y, 500)
         self.line, = self.ax.plot(n[0],n[1], color='r', label='目标车速', marker='.')
         self.line_1, = self.ax1.plot(n[0], n[1], color='r', label='目标车速', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax.legend(loc='best')
         self.ax1.legend(loc='best')
         self.canvas.draw()
@@ -426,6 +429,8 @@ class AppForm(QMainWindow):
         f = open('speed_cmd.txt', 'r')
         mode = []
         time = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -445,6 +450,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='k', label='驾驶模式', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -453,6 +459,8 @@ class AppForm(QMainWindow):
         f = open('speed_cmd.txt', 'r')
         time = []
         t = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -472,6 +480,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='g', label='达到目标速度时间', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -480,6 +489,8 @@ class AppForm(QMainWindow):
         f = open('steer_cmd.txt', 'r')
         time = []
         steer_pos = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -499,6 +510,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='m', label='决策方向盘转角', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -507,6 +519,8 @@ class AppForm(QMainWindow):
         f = open('steer_cmd.txt', 'r')
         time = []
         steer_spe = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -526,6 +540,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='tan', label='决策方向盘转速', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -534,6 +549,8 @@ class AppForm(QMainWindow):
         f = open('vehicle_status.txt', 'r')
         time = []
         mode = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -554,6 +571,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='b', label='驾驶模式开关状态', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -562,6 +580,8 @@ class AppForm(QMainWindow):
         f = open('vehicle_status.txt', 'r')
         time = []
         steerPos = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -582,6 +602,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='yellow', label='方向盘转角', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -590,6 +611,8 @@ class AppForm(QMainWindow):
         f = open('vehicle_status.txt', 'r')
         time = []
         steerspe = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -610,6 +633,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='darkviolet', label='方向盘转速', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -618,6 +642,8 @@ class AppForm(QMainWindow):
         f = open('vehicle_status.txt', 'r')
         time = []
         light = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -638,6 +664,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='aqua', label='转向灯', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -646,6 +673,8 @@ class AppForm(QMainWindow):
         f = open('vehicle_status.txt', 'r')
         time = []
         speed = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -666,6 +695,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='y', label='左轮速度', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -674,6 +704,8 @@ class AppForm(QMainWindow):
         f = open('vehicle_status.txt', 'r')
         time = []
         speed = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -694,6 +726,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='c', label='右轮速度', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -702,6 +735,8 @@ class AppForm(QMainWindow):
         f = open('vehicle_status.txt', 'r')
         time = []
         vot = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -722,6 +757,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='brown', label='电压', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -730,6 +766,8 @@ class AppForm(QMainWindow):
         f = open('vehicle_status.txt', 'r')
         time = []
         shift = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -750,6 +788,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='lime', label='挡位', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -758,6 +797,8 @@ class AppForm(QMainWindow):
         f = open('vehicle_status.txt', 'r')
         time = []
         dis = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -778,6 +819,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='gold', label='左轮距离', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -786,6 +828,8 @@ class AppForm(QMainWindow):
         f = open('vehicle_status.txt', 'r')
         time = []
         dis = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -806,49 +850,55 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='orange', label='右轮距离', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
-    def VEHICLE_STATUS_accelerationLat(self):
-        self.ax1.clear()
-        f = open('gps_data.txt', 'r')
-        time = []
-        accelerationLat = []
-        done = 0
-        while not done:
-            line = f.readline()
-            line = line.strip('\n')
-            if line != '':
-                a = line.split(' ')
-                if len(a) == 15:
-                    time.append(float(a[0]))
-                    accelerationLat.append(float(a[14]))
-
-            else:
-                done = 1
-        f.close
-        self.x = np.array(time)
-        self.y = np.array(accelerationLat)
-        n = self.get_peaks(self.x, self.y, 500)
-        self.line, = self.ax.plot(n[0], n[1], color='pink', label='横向加速度', marker='.')
-        self.ax.legend(loc='best')
-        self.canvas.draw()
-        self.line_1, = self.ax1.plot(n[0], n[1], color='pink', label='横向加速度', marker='.')
-        self.ax1.legend(loc='best')
-        self.canvas2.draw()
+    # def VEHICLE_STATUS_accelerationLat(self):
+    #     self.ax1.clear()
+    #     f = open('gps_data.txt', 'r')
+    #     time = []
+    #     accelerationLat = []
+    #     self.x_k = []
+    #     self.y_k = []
+    #     done = 0
+    #     while not done:
+    #         line = f.readline()
+    #         line = line.strip('\n')
+    #         if line != '':
+    #             a = line.split(' ')
+    #             if len(a) == 15:
+    #                 time.append(float(a[0]))
+    #                 accelerationLat.append(float(a[14]))
+    #
+    #         else:
+    #             done = 1
+    #     f.close
+    #     self.x = np.array(time)
+    #     self.y = np.array(accelerationLat)
+    #     n = self.get_peaks(self.x, self.y, 500)
+    #     self.line, = self.ax.plot(n[0], n[1], color='pink', label='加速度', marker='.')
+    #     self.ax.legend(loc='best')
+    #     self.canvas.draw()
+    #     self.line_1, = self.ax1.plot(n[0], n[1], color='pink', label='加速度', marker='.')
+    #     self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
+    #     self.ax1.legend(loc='best')
+    #     self.canvas2.draw()
 
     def GPS_DATA_velocity(self):
         self.ax1.clear()
         f = open('gps_data.txt', 'r')
         time = []
         velocity = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 15:
+                if len(a) == 14:
                     time.append(float(a[0]))
                     velocity.append(float(a[10]))
 
@@ -862,6 +912,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='violet', label='车速', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -870,13 +921,15 @@ class AppForm(QMainWindow):
         f = open('gps_data.txt', 'r')
         time = []
         yaw = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 15:
+                if len(a) == 14:
                     time.append(float(a[0]))
                     yaw.append(float(a[3]))
 
@@ -890,6 +943,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='plum', label='航向角', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -898,13 +952,15 @@ class AppForm(QMainWindow):
         f = open('gps_data.txt', 'r')
         time = []
         roll = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 15:
+                if len(a) == 14:
                     time.append(float(a[0]))
                     roll.append(float(a[4]))
 
@@ -918,6 +974,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='purple', label='翻滚角', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -926,13 +983,15 @@ class AppForm(QMainWindow):
         f = open('gps_data.txt', 'r')
         time = []
         pitch = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 15:
+                if len(a) == 14:
                     time.append(float(a[0]))
                     pitch.append(float(a[5]))
 
@@ -946,6 +1005,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='indigo', label='俯仰角', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -954,13 +1014,15 @@ class AppForm(QMainWindow):
         f = open('gps_data.txt', 'r')
         time = []
         yawRate = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 15:
+                if len(a) == 14:
                     time.append(float(a[0]))
                     yawRate.append(float(a[6]))
 
@@ -974,6 +1036,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='navy', label='横摆角速度GPS', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -982,13 +1045,15 @@ class AppForm(QMainWindow):
         f = open('gps_data.txt', 'r')
         time = []
         velocityNorth = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 15:
+                if len(a) == 14:
                     time.append(float(a[0]))
                     velocityNorth.append(float(a[7]))
 
@@ -1002,6 +1067,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='teal', label='北向车速', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1010,13 +1076,15 @@ class AppForm(QMainWindow):
         f = open('gps_data.txt', 'r')
         time = []
         velocityEast = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 15:
+                if len(a) == 14:
                     time.append(float(a[0]))
                     velocityEast.append(float(a[8]))
 
@@ -1030,6 +1098,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='gray', label='东向车速', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1038,13 +1107,15 @@ class AppForm(QMainWindow):
         f = open('gps_data.txt', 'r')
         time = []
         velocityDown = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 15:
+                if len(a) == 14:
                     time.append(float(a[0]))
                     velocityDown.append(float(a[9]))
 
@@ -1058,6 +1129,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='darkred', label='垂直地面速度', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1066,13 +1138,15 @@ class AppForm(QMainWindow):
         f = open('gps_data.txt', 'r')
         time = []
         locationStatus = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 15:
+                if len(a) == 14:
                     time.append(float(a[0]))
                     locationStatus.append(float(a[11]))
 
@@ -1086,6 +1160,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='tomato', label='定位模式', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1094,13 +1169,15 @@ class AppForm(QMainWindow):
         f = open('gps_data.txt', 'r')
         time = []
         confidenceLevel = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 15:
+                if len(a) == 14:
                     time.append(float(a[0]))
                     confidenceLevel.append(float(a[12]))
 
@@ -1114,6 +1191,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='sienna', label='可信度', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1122,13 +1200,15 @@ class AppForm(QMainWindow):
         f = open('gps_data.txt', 'r')
         time = []
         satelliteNumber = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 15:
+                if len(a) == 14:
                     time.append(float(a[0]))
                     satelliteNumber.append(float(a[13]))
 
@@ -1142,6 +1222,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='khaki', label='卫星数量', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1150,13 +1231,15 @@ class AppForm(QMainWindow):
         f = open('gps_data.txt', 'r')
         latitude = []
         longittude = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 15:
+                if len(a) == 14:
                     latitude.append(float(a[2]))
                     longittude.append(float(a[1]))
 
@@ -1170,6 +1253,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='seagreen', label='经纬度', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1178,6 +1262,8 @@ class AppForm(QMainWindow):
         f = open('camera_line_msg.txt', 'r')
         time = []
         change_lane = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1198,6 +1284,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='deepskyblue', label='换道状态', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1206,6 +1293,8 @@ class AppForm(QMainWindow):
         f = open('camera_line_msg.txt', 'r')
         time = []
         left_lane = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1226,6 +1315,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='crimson', label='左车道线', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1234,6 +1324,8 @@ class AppForm(QMainWindow):
         f = open('camera_line_msg.txt', 'r')
         time = []
         right_lane = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1254,6 +1346,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='orchid', label='右车道线', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1262,6 +1355,8 @@ class AppForm(QMainWindow):
         f = open('camera_line_msg.txt', 'r')
         time = []
         left_lane_length = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1282,6 +1377,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='dodgerblue', label='左车道线长度', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1290,6 +1386,8 @@ class AppForm(QMainWindow):
         f = open('camera_line_msg.txt', 'r')
         time = []
         right_lane_length = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1310,6 +1408,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='thistle', label='右车道线长度', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1318,6 +1417,8 @@ class AppForm(QMainWindow):
         f = open('camera_line_msg.txt', 'r')
         time = []
         lane_width = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1338,6 +1439,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='mediumspringgreen', label='车道宽度', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1346,6 +1448,8 @@ class AppForm(QMainWindow):
         f = open('camera_line_msg.txt', 'r')
         time = []
         object_count = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1366,6 +1470,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='mediumslateblue', label='目标个数', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1374,6 +1479,8 @@ class AppForm(QMainWindow):
         f = open('camera_object_msg.txt', 'r')
         time = []
         object_id = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1394,6 +1501,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='maroon', label='目标的ID', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1402,6 +1510,8 @@ class AppForm(QMainWindow):
         f = open('camera_object_msg.txt', 'r')
         time = []
         object_type = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1422,6 +1532,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='sienna', label='目标类别', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1430,6 +1541,8 @@ class AppForm(QMainWindow):
         f = open('camera_object_msg.txt', 'r')
         time = []
         object_brake = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1450,6 +1563,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='chocolate', label='刹车状态', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1458,6 +1572,8 @@ class AppForm(QMainWindow):
         f = open('camera_object_msg.txt', 'r')
         time = []
         object_turn = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1478,6 +1594,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='saddlebrown', label='转向灯状态', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1486,6 +1603,8 @@ class AppForm(QMainWindow):
         f = open('camera_object_msg.txt', 'r')
         time = []
         object_speedLon = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1506,6 +1625,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='peachpuff', label='纵向相对运动速度', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1514,6 +1634,8 @@ class AppForm(QMainWindow):
         f = open('camera_object_msg.txt', 'r')
         time = []
         object_speedLat = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1534,6 +1656,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='sandybrown', label='横向相对运动速度', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1542,6 +1665,8 @@ class AppForm(QMainWindow):
         f = open('camera_object_msg.txt', 'r')
         time = []
         object_angle = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1562,6 +1687,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='bisque', label='车头朝向', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1570,6 +1696,8 @@ class AppForm(QMainWindow):
         f = open('camera_object_msg.txt', 'r')
         time = []
         object_confidence = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1590,6 +1718,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='burlywood', label='目标可信度', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1598,6 +1727,8 @@ class AppForm(QMainWindow):
         f = open('camera_object_msg.txt', 'r')
         time = []
         object_width = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1618,6 +1749,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='darkgoldenrod', label='目标宽度', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1626,6 +1758,8 @@ class AppForm(QMainWindow):
         f = open('camera_object_msg.txt', 'r')
         time = []
         object_height = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1646,6 +1780,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='chartreuse', label='目标高度', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
 
@@ -1654,6 +1789,8 @@ class AppForm(QMainWindow):
         f = open('camera_object_msg.txt', 'r')
         time = []
         object_length = []
+        self.x_k = []
+        self.y_k = []
         done = 0
         while not done:
             line = f.readline()
@@ -1674,6 +1811,7 @@ class AppForm(QMainWindow):
         self.ax.legend(loc='best')
         self.canvas.draw()
         self.line_1, = self.ax1.plot(n[0], n[1], color='dodgerblue', label='目标长度', marker='.')
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.ax1.legend(loc='best')
         self.canvas2.draw()
         
@@ -1831,9 +1969,11 @@ class AppForm(QMainWindow):
                                          shortcut="Right", tip="Close the application")
         step_donw = self.create_action("&后退一步", slot=self.step_donw,
                                            shortcut="Left", tip="Close the application")
+        ax_point = self.create_action("&精确到当前时间", slot=self.ax_point,
+                                       shortcut="J", tip="Close the application")
 
         self.add_actions(self.file_menu,
-                         (load_file_action, one_step_up, one_step_donw, resume, pause, stope_image, show_image_n, step_up, step_donw, None, quit_action))
+                         (load_file_action, one_step_up, one_step_donw, resume, pause, stope_image, show_image_n, step_up, step_donw, ax_point, None, quit_action))
 
         self.help_menu = self.menuBar().addMenu("&帮助")
         about_action = self.create_action("&关于",
@@ -2283,8 +2423,8 @@ class AppForm(QMainWindow):
                 a.write(str(msg.velocity) + ' ')
                 a.write(str(msg.locationStatus) + ' ')
                 a.write(str(msg.confidenceLevel) + ' ')
-                a.write(str(msg.satelliteNumber) + ' ')
-                a.write(str(msg.accelerationLongitudinal) + '\n')
+                a.write(str(msg.satelliteNumber) + '\n')
+                # a.write(str(msg.accelerationLongitudinal) + '\n')
 
             if event.channel == "camera":
                 msg = lcmtypes.camera_info_t.decode(event.data)
@@ -2321,10 +2461,9 @@ class AppForm(QMainWindow):
             line = line.strip('\n')
             if line != '':
                 a = line.split(' ')
-                if len(a) == 15:
+                if len(a) == 14:
                     time.append(float(a[0]))
-
-                if len(a) == 15:
+                if len(a) == 14:
                     velocity.append(float(a[10]))
 
             else:
@@ -2362,6 +2501,9 @@ class AppForm(QMainWindow):
         self.Xc = []
         self.XL = []
         self.YL = []
+        self.x_k = []
+        self.y_k = []
+        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
         self.line1, = self.plt1.plot(self.x1, self.y1, 'rx', label='ESR目标')
         self.line2, = self.plt1.plot(self.x2, self.y2, 'rx')
         self.line3, = self.plt1.plot(self.xc, self.yc, 'b.', label='视觉目标')
@@ -2372,14 +2514,14 @@ class AppForm(QMainWindow):
         self.line7, = self.plt1.plot(self.Yrr, self.Xrr, color='m', label='右外侧车道线', marker='.')
         self.line8, = self.plt1.plot(self.Yc, self.Xc, color='c', label='中心线', marker='.')
         self.line9, = self.plt1.plot(self.XL, self.YL, 'kp', label='16线目标')
-        self.plt1.legend(loc='best')
+        self.plt1.legend(loc='upper right')
         self.plt1.axis([-20, 20, -150, 150])
         self.canvas1.draw()
         self.slider.setRange(0, len(self.event_msg) - 1)
         self.slider.setValue(0)
         self.slider.setTracking(True)
         self.slider.setTickPosition(QSlider.TicksBothSides)
-        
+
     def update_pltdata(self):
         self.x0, self.x1 = self.ax.get_xlim()
         cha = self.x1 - self.x0
@@ -2389,15 +2531,22 @@ class AppForm(QMainWindow):
         n1 = self.get_peaks(self.x, self.y, 500, self.x2 - cha1, self.x3 + cha1)
         self.line.set_data(n[0], n[1])
         self.line_1.set_data(n1[0], n1[1])
+        self.line_2.set_data(self.x_k, self.y_k)
         self.ax.figure.canvas.draw()
         self.ax1.figure.canvas.draw()
-        
+
     def ax_point(self):
         self.t = self.read_num
+        self.x_k = []
+        self.y_k = []
         self.log.seek(self.event_msg[self.t - 1][2])
         event_readed = self.log.next()
         y0, y1 = self.ax1.get_ylim()
+        for i in range(1000):
+            self.x_k.append(event_readed.timestamp)
+            self.y_k.append(i)
         self.ax1.axis([event_readed.timestamp - 5000000, event_readed.timestamp + 5000000, y0, y1])
+        self.line_2.set_data(self.x_k, self.y_k)
         self.canvas2.draw()
 
 
