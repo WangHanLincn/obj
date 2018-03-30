@@ -2047,14 +2047,14 @@ class AppForm(QMainWindow):
                         self.__flag.wait()  # 为True时立即返回, 为False时阻塞直到内部的标识位为True后返回
                         im = lcmtypes.image_t.decode(event_readed.data)
                         self.textbox2.setText('%d ' % self.read_num)
-                        time.sleep(0.035)
+                        time.sleep(0.03)
                 except ValueError:
                     if self.__running.isSet():
                         self.__flag.wait()  # 为True时立即返回, 为False时阻塞直到内部的标识位为True后返回
                         msg = lcmtypes.image_fragment_t.decode(event_readed.data)
                         im = msg.image
                         self.textbox2.setText('%d ' % self.read_num)
-                        time.sleep(0.035)
+                        time.sleep(0.03)
             elif event_readed.channel == "camera":
                 time.sleep(0.0005)
             elif event_readed.channel == "ESR_REAR_WHOLE_DATA":
@@ -2097,7 +2097,7 @@ class AppForm(QMainWindow):
     def update(self):
         im2 = QtGui.QPixmap()
         while d:
-            time.sleep(0.037)
+            time.sleep(0.035)
             if im != None:
                 im2.loadFromData(im)
                 self.label_2.setPixmap(im2)
