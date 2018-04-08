@@ -1248,14 +1248,14 @@ class AppForm(QMainWindow):
         f.close
         self.x = np.array(latitude)
         self.y = np.array(longittude)
-        n = self.get_peaks(self.y, self.x, 500)
-        self.line, = self.ax.plot(n[0], n[1], color='seagreen', label='经纬度', marker='.')
+        # n = self.get_peaks(self.y, self.x, 500)
+        self.line, = self.ax.plot(self.y, self.x, color='seagreen', label='经纬度', marker='.')
         self.ax.legend(loc='best')
         self.canvas.draw()
-        self.line_1, = self.ax1.plot(n[0], n[1], color='seagreen', label='经纬度', marker='.')
-        self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
-        self.ax1.legend(loc='best')
-        self.canvas2.draw()
+        # self.line_1, = self.ax1.plot(n[0], n[1], color='seagreen', label='经纬度', marker='.')
+        # self.line_2, = self.ax1.plot(self.x_k, self.y_k, color='k')
+        # self.ax1.legend(loc='best')
+        # self.canvas2.draw()
 
     def camera_change_lane(self):
         self.ax1.clear()
