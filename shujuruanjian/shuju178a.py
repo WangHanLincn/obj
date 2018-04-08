@@ -67,7 +67,10 @@ class AppForm(QMainWindow):
         QMessageBox.information(self, "Click!", msg)
 
     def clear(self):
+        self.x_k1 = []
+        self.y_k1 = []
         self.ax.clear()
+        self.line_3, = self.ax.plot(self.x_k1, self.y_k1, color='k')
         self.canvas.draw()
 
     def get_peaks(self, x, y, n, x0=None, x1=None):
@@ -2539,15 +2542,23 @@ class AppForm(QMainWindow):
         self.t = self.read_num
         self.x_k = []
         self.y_k = []
+        self.x_k1 = []
+        self.y_k1 = []
         self.log.seek(self.event_msg[self.t - 1][2])
         event_readed = self.log.next()
+        x0, x1 = self.ax.get_xlim()
         y0, y1 = self.ax1.get_ylim()
-        for i in range(1000):
+        for i in range(-1000, 1000, 2):
             self.x_k.append(event_readed.timestamp)
             self.y_k.append(i)
+            self.x_k1.append(event_readed.timestamp)
+            self.y_k1.append(i)
         self.ax1.axis([event_readed.timestamp - 5000000, event_readed.timestamp + 5000000, y0, y1])
         self.line_2.set_data(self.x_k, self.y_k)
         self.canvas2.draw()
+        self.ax.axis([x0, x1, y0, y1])
+        self.line_3.set_data(self.x_k1, self.y_k1)
+        self.canvas.draw()
 
 
 def main():
