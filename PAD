@@ -1,1 +1,407 @@
+#!/home/lvchi/anaconda3/bin/python
+#-*-coding:utf-8-*-
+import lcm
+import struct
+import threading
+import time
+from lcmtypes import *
+from socket import *
 
+
+# HOST = '192.168.0.194'
+# HOST = '192.168.1.127'
+# HOST = '192.168.100.178'
+from lcmtypes import route_status_t
+
+HOST = '192.168.0.165'
+PORT = 9801
+udpSocket = socket(AF_INET, SOCK_DGRAM)
+# udpSocket.settimeout(0.5)
+udpSocket.bind((HOST, PORT))
+print("...waiting for message...")
+
+# while True:
+#     try:
+#         udpData, address = udpSocket.recvfrom(1024)
+#         break
+#     except:
+#         pass
+#         print('eror')
+udpData, address = udpSocket.recvfrom(1024)
+
+
+address_v = (address[0], 8895)
+print(address, address_v)
+print (udpData, address)
+
+camera_info_count = 0
+speed_cmd_count = 0
+vehicle_status_count = 0
+lux_info_count = 0
+gps_imu_info_count = 0
+esr_front_count = 0
+count = 0
+camera_status = 1
+vlc_status = 1
+uvd_status = 20
+lux_status = 1
+gps_status = 1
+esr_front_status = 1
+send_count = 0
+location_txt = ""
+
+longitude = 0.0
+latitude = 0.0
+
+
+class send_thread(threading.Thread):
+    def run(self):
+        global camera_info_count, speed_cmd_count, vehicle_status_count, lux_info_count, gps_imu_info_count, \
+            esr_front_count, count, camera_status, vlc_status, uvd_status, lux_status, gps_status, esr_front_status, send_count
+        while(1):
+            if camera_info_count == 0:
+                camera_status = 0
+            else:
+                camera_status = 1
+                camera_info_count = 0
+            if speed_cmd_count == 0:
+                vlc_status = 0
+            else:
+                vlc_status = 1
+                speed_cmd_count = 0
+            if vehicle_status_count == 0:
+                uvd_status = 20
+            else:
+                uvd_status = 1
+                vehicle_status_count = 0
+            if lux_info_count == 0:
+                lux_status = 0
+            else:
+                lux_status = 1
+                lux_info_count = 0
+            if gps_imu_info_count == 0:
+                gps_status = 0
+            else:
+                gps_status = 1
+                gps_imu_info_count = 0
+            if esr_front_count == 0:
+                esr_front_status = 0
+            else:
+                esr_front_status = 1
+                esr_front_count = 0
+            sensor_status = struct.pack('7h', 49, camera_status, vlc_status, uvd_status, lux_status, gps_status, esr_front_status)
+            # print camera_status, vlc_status, uvd_status, lux_status, gps_status, esr_front_status
+            if send_count>2:
+                udpSocket.sendto(sensor_status, address_v)
+            send_count +=1
+            if send_count == 65534:
+                send_count = 1
+            time.sleep(0.3)
+
+
+class receive_thread (threading.Thread):
+    def run(self):
+        while(1):
+            udpData, address = udpSocket.recvfrom(1024)
+            # print (struct.unpack('9b', udpData))
+            msg = pad_control_info_t()
+            msg.utime = 0
+            msg.esr_onoff = struct.unpack('9b',udpData)[1]
+            msg.lux40_onoff = struct.unpack('9b',udpData)[2]
+            msg.gps_onoff = struct.unpack('9b',udpData)[3]
+            msg.speed_updown = struct.unpack('9b',udpData)[4]
+            msg.lane_change = struct.unpack('9b',udpData)[5]
+            msg.drive_mode = struct.unpack('9b',udpData)[6]
+            if (struct.unpack('9b', udpData)[7] == 1):
+                msg.longitude = float(location_txt.split(",")[2])
+                msg.latitude = float(location_txt.split(",")[1])
+            elif (struct.unpack('9b', udpData)[7] == 2):
+                msg.longitude = float(location_txt.split(",")[5])
+                msg.latitude = float(location_txt.split(",")[4])
+            elif (struct.unpack('9b', udpData)[7] == 3):
+                msg.longitude = float(location_txt.split(",")[8])
+                msg.latitude = float(location_txt.split(",")[7])
+            elif (struct.unpack('9b', udpData)[7] == 4):
+                msg.longitude = float(location_txt.split(",")[11])
+                msg.latitude = float(location_txt.split(",")[10])
+            elif (struct.unpack('9b', udpData)[7] == 5):
+                msg.longitude = float(location_txt.split(",")[14])
+                msg.latitude = float(location_txt.split(",")[13])
+            elif (struct.unpack('9b', udpData)[7] == 6):
+                msg.longitude = float(location_txt.split(",")[17])
+                msg.latitude = float(location_txt.split(",")[16])
+            elif (struct.unpack('9b', udpData)[7] == 7):
+                msg.longitude = float(location_txt.split(",")[20])
+                msg.latitude = float(location_txt.split(",")[19])
+            elif (struct.unpack('9b', udpData)[7] == 8):
+                msg.longitude = float(location_txt.split(",")[23])
+                msg.latitude = float(location_txt.split(",")[22])
+            elif (struct.unpack('9b', udpData)[7] == 9):
+                msg.longitude = float(location_txt.split(",")[26])
+                msg.latitude = float(location_txt.split(",")[25])
+            elif (struct.unpack('9b', udpData)[7] == 10):
+                msg.longitude = float(location_txt.split(",")[29])
+                msg.latitude = float(location_txt.split(",")[28])
+            elif (struct.unpack('9b', udpData)[7] == 11):
+                msg.longitude = float(location_txt.split(",")[32])
+                msg.latitude = float(location_txt.split(",")[31])
+            elif (struct.unpack('9b', udpData)[7] == 12):
+                msg.longitude = float(location_txt.split(",")[35])
+                msg.latitude = float(location_txt.split(",")[34])
+            elif (struct.unpack('9b', udpData)[7] == 13):
+                msg.longitude = float(location_txt.split(",")[38])
+                msg.latitude = float(location_txt.split(",")[37])
+            elif (struct.unpack('9b', udpData)[7] == 14):
+                msg.longitude = 10000
+                msg.latitude = 10000
+            else:
+                msg.longitude = 0
+                msg.latitude = 0
+
+            msg.follow_past = struct.unpack('9b',udpData)[8]
+            # print(msg.latitude, msg.longitude)
+            lc.publish("PAD_CONTROL", msg.encode())
+            # print(time.time(), msg.speed_updown)
+            # print (msg.lane_change,msg.speed_updown)
+
+
+class readtxt_thread(threading.Thread):
+    def run(self):
+        while True:
+            global location_txt, longitude, latitude
+
+            if 40.0229655 < latitude < 40.0941064 and 116.2904943 < longitude < 116.3467772 and longitude + 0.82059105 * latitude > 149.1779787:
+                file_object = open('locationA.txt')
+            elif 40.0370359 < latitude < 40.0481177 and 116.3521801 < longitude < 116.3568174:
+                file_object = open('locationB.txt')
+            elif 40.0083548 < latitude < 40.1001592 and 116.2509781 < longitude < 116.3338851 and longitude + 0.82059105 * latitude < 149.1779787:
+                file_object = open('locationC.txt')
+            elif 39.0 < latitude < 40.1001592 and 117.3 < longitude < 117.6:
+                file_object = open('location.txt')
+            else:
+                file_object = open('locationC.txt')
+
+            try:
+                location_txt = file_object.read()
+            finally:
+                file_object.close()
+            print (location_txt)
+            time.sleep(60)
+
+
+def my_handler(channel, data):
+    global camera_info_count, speed_cmd_count, vehicle_status_count, lux_info_count, gps_imu_info_count, \
+        esr_front_count, count, camera_status, vlc_status, uvd_status, lux_status, gps_status, esr_front_status, \
+        longitude, latitude
+    if channel == "camera":
+        camera_info = camera_info_t.decode(data)
+        message_id = 55
+        udp_time = camera_info.utime
+        change_lane = camera_info.change_lane
+        lane_width = camera_info.lane_width
+        line_center_confidence = camera_info.center_line.confidence
+        line_center_length = camera_info.center_line.length
+        line_center_a = camera_info.center_line.a
+        line_center_b = camera_info.center_line.b
+        line_center_c = camera_info.center_line.c
+        line_center_d = camera_info.center_line.d
+        line0_confidence = camera_info.lines[0].confidence
+        line0_type = camera_info.lines[0].type
+        line0_color = camera_info.lines[0].lineColor
+        line0_length = camera_info.lines[0].length
+        line0_a = camera_info.lines[0].a
+        line0_b = camera_info.lines[0].b
+        line0_c = camera_info.lines[0].c
+        line0_d = camera_info.lines[0].d
+        line1_confidence = camera_info.lines[1].confidence
+        line1_type = camera_info.lines[1].type
+        line1_color = camera_info.lines[1].lineColor
+        line1_length = camera_info.lines[1].length
+        line1_a = camera_info.lines[1].a
+        line1_b = camera_info.lines[1].b
+        line1_c = camera_info.lines[1].c
+        line1_d = camera_info.lines[1].d
+        line2_confidence = camera_info.lines[2].confidence
+        line2_type = camera_info.lines[2].type
+        line2_color = camera_info.lines[2].lineColor
+        line2_length = camera_info.lines[2].length
+        line2_a = camera_info.lines[2].a
+        line2_b = camera_info.lines[2].b
+        line2_c = camera_info.lines[2].c
+        line2_d = camera_info.lines[2].d
+        line3_confidence = camera_info.lines[3].confidence
+        line3_type = camera_info.lines[3].type
+        line3_color = camera_info.lines[3].lineColor
+        line3_length = camera_info.lines[3].length
+        line3_a = camera_info.lines[3].a
+        line3_b = camera_info.lines[3].b
+        line3_c = camera_info.lines[3].c
+        line3_d = camera_info.lines[3].d
+        object_count = camera_info.object_count
+        objects = [[0 for i in range(13)] for i in range(object_count)]
+        for i in range(0,object_count,1):
+            objects[i][0] = camera_info.objects[i].centerPoint.x
+            objects[i][1] = camera_info.objects[i].centerPoint.y
+            objects[i][2] = camera_info.objects[i].id
+            objects[i][3] = camera_info.objects[i].type
+            objects[i][4] = camera_info.objects[i].brake
+            objects[i][5] = camera_info.objects[i].turn
+            objects[i][6] = camera_info.objects[i].speedLon
+            objects[i][7] = camera_info.objects[i].speedLat
+            objects[i][8] = camera_info.objects[i].angle
+            objects[i][9] = camera_info.objects[i].confidence
+            objects[i][10] = camera_info.objects[i].width
+            objects[i][11] = camera_info.objects[i].height
+            objects[i][12] = camera_info.objects[i].length
+        camera_info_udp = struct.pack('hqB8f2b6f2b6f2b6f2b5fh75f', message_id, udp_time, change_lane, lane_width,
+                                      line_center_confidence, line_center_length, line_center_a, line_center_b,
+                                      line_center_c, line_center_d,
+                                      line0_confidence, line0_type, line0_color, line0_length, line0_a, line0_b,
+                                      line0_c, line0_d, line1_confidence, line1_type, line1_color, line1_length,
+                                      line1_a, line1_b, line1_c, line1_d, line2_confidence, line2_type, line2_color,
+                                      line2_length, line2_a, line2_b, line2_c, line2_d, line3_confidence, line3_type,
+                                      line3_color, line3_length, line3_a, line3_b, line3_c, line3_d, object_count,
+                                      objects[0][0], objects[0][1], objects[0][6], objects[0][7], objects[0][10],
+                                      objects[1][0], objects[1][1], objects[1][6], objects[1][7], objects[1][10],
+                                      objects[2][0], objects[2][1], objects[2][6], objects[2][7], objects[2][10],
+                                      objects[3][0], objects[3][1], objects[3][6], objects[3][7], objects[3][10],
+                                      objects[4][0], objects[4][1], objects[4][6], objects[4][7], objects[4][10],
+                                      objects[5][0], objects[5][1], objects[5][6], objects[5][7], objects[5][10],
+                                      objects[6][0], objects[6][1], objects[6][6], objects[6][7], objects[6][10],
+                                      objects[7][0], objects[7][1], objects[7][6], objects[7][7], objects[7][10],
+                                      objects[8][0], objects[8][1], objects[8][6], objects[8][7], objects[8][10],
+                                      objects[9][0], objects[9][1], objects[9][6], objects[9][7], objects[9][10],
+                                      objects[10][0], objects[10][1], objects[10][6], objects[10][7], objects[10][10],
+                                      objects[11][0], objects[11][1], objects[11][6], objects[11][7], objects[11][10],
+                                      objects[12][0], objects[12][1], objects[12][6], objects[12][7], objects[12][10],
+                                      objects[13][0], objects[13][1], objects[13][6], objects[13][7], objects[13][10],
+                                      objects[14][0], objects[14][1], objects[14][6], objects[14][7], objects[14][10])
+        # print line0_type, line1_type, line2_type, line3_type
+        # print (line_center_confidence, line_center_length, line_center_a, line_center_b, line_center_c, line_center_d)
+        udpSocket.sendto(camera_info_udp, address_v)
+        camera_info_count += 1
+    elif channel == "SPEED_CMD":
+        speed_cmd = speed_cmd_t.decode(data)
+        message_id = 53
+        udp_time = speed_cmd.utime
+        aim_spe = speed_cmd.aim_spe
+        mode = speed_cmd.mode
+        t = speed_cmd.t
+        speed_cmd_udp = struct.pack('hqfif', message_id, udp_time, aim_spe, mode, t)
+        udpSocket.sendto(speed_cmd_udp, address_v)
+        speed_cmd_count += 1
+    elif channel == "VEHICLE_STATUS":
+        vehicle_status = vehicle_status_t.decode(data)
+        message_id = 51
+        udp_time = vehicle_status.utime
+        nauto = vehicle_status.nauto
+        steerPos = vehicle_status.steerPos
+        steerSpe = vehicle_status.steerSpe
+        light = vehicle_status.light
+        speLeft = vehicle_status.speLeft
+        speRight = vehicle_status.speRight
+        vot = vehicle_status.vot
+        shift = vehicle_status.shift
+        disLeft = vehicle_status.disLeft
+        disRight = vehicle_status.disRight
+        speo = vehicle_status.speo
+        yawRate = vehicle_status.yawRate
+        accelerationLon = vehicle_status.accelerationLon
+        accelerationLat = vehicle_status.accelerationLat
+        vehicle_status_udp = struct.pack('hqif2i3fi6f', message_id, udp_time, nauto, steerPos, steerSpe, light, speLeft,
+                                         speRight, vot, shift, disLeft, disRight, speo, yawRate, accelerationLon,
+                                         accelerationLat)
+        udpSocket.sendto(vehicle_status_udp, address_v)
+        vehicle_status_count += 1
+        # print(time.time(),vot)
+    elif channel =="LIDAR_OBJECT_SIDE":
+        lux_info_count += 1
+    elif channel == "GPS_DATA":
+        gps_imu_info = gps_imu_info_t.decode(data)
+        message_id = 47
+        utime = gps_imu_info.utime
+        longitude = gps_imu_info.longitude
+        latitude = gps_imu_info.latitude
+        altitude = gps_imu_info.altitude
+        yaw = gps_imu_info.yaw
+        roll = gps_imu_info.roll
+        pitch = gps_imu_info.pitch
+        yawRate = gps_imu_info.yawRate
+        velocityNorth = gps_imu_info.velocityNorth
+        velocityEast = gps_imu_info.velocityEast
+        velocityDown = gps_imu_info.velocityDown
+        accelerationLongitudinal = gps_imu_info.accelerationLongitudinal
+        accelerationLateral = gps_imu_info.accelerationLateral
+        acceleration = gps_imu_info.acceleration
+        velocity = gps_imu_info.velocity
+        locationStatus = gps_imu_info.locationStatus
+        confidenceLevel = gps_imu_info.confidenceLevel
+        yawEstimate = gps_imu_info.yawEstimate
+        longitudeEstimate = gps_imu_info.longitudeEstimate
+        latitudeEstimate = gps_imu_info.latitudeEstimate
+        satelliteNumber = gps_imu_info.satelliteNumber
+        gps_imu_info_udp = struct.pack('hq2d12f2dh', message_id, utime, longitude, latitude, altitude, yaw, roll, pitch,
+                                       yawRate, velocityNorth, velocityEast, velocityDown, velocity, locationStatus,
+                                       confidenceLevel, yawEstimate, longitudeEstimate, latitudeEstimate,
+                                       satelliteNumber)
+        # print longitude, latitude, yaw
+        udpSocket.sendto(gps_imu_info_udp, address_v)
+        gps_imu_info_count += 1
+    elif channel == "UVD_PAD":
+        pad_control_info = pad_control_info_t.decode(data)
+        message_id = 45
+        followPast = pad_control_info.follow_past
+        uvd_pad_udp = struct.pack('hB', message_id, followPast)
+        udpSocket.sendto(uvd_pad_udp, address_v)
+    elif channel == "ROUTE_STATUS":
+        route_status = route_status_t.decode(data)
+        message_id = 43
+        status = route_status.status
+        longitude = route_status.longitude
+        latitude = route_status.latitude
+        route_udp = struct.pack('hB2d', message_id, status, longitude, latitude)
+        udpSocket.sendto(route_udp, address_v)
+    elif channel == "ESR_FRONT_DATA":
+        esr_front_count += 1
+
+
+loc_rec_thread = send_thread()
+loc_rec_thread.setDaemon(True)
+loc_rec_thread.start()
+
+data_rec_thread = receive_thread()
+data_rec_thread.setDaemon(True)
+data_rec_thread.start()
+
+data_rec_thread = readtxt_thread()
+data_rec_thread.setDaemon(True)
+data_rec_thread.start()
+
+lc = lcm.LCM()
+subscriptionC = lc.subscribe("camera", my_handler)
+subscriptionS = lc.subscribe("SPEED_CMD", my_handler)
+subscriptionV = lc.subscribe("VEHICLE_STATUS", my_handler)
+subscriptionL = lc.subscribe("LIDAR_OBJECT_SIDE", my_handler)
+subscriptionG = lc.subscribe("GPS_DATA", my_handler)
+subscriptionE = lc.subscribe("ESR_FRONT_DATA", my_handler)
+subscriptionU = lc.subscribe("UVD_PAD", my_handler)
+subscriptionR = lc.subscribe("ROUTE_STATUS", my_handler)
+
+
+try:
+    while True:
+        lc.handle()
+except KeyboardInterrupt:
+    pass
+
+lc.unsubscribe(subscriptionC)
+lc.unsubscribe(subscriptionS)
+lc.unsubscribe(subscriptionV)
+lc.unsubscribe(subscriptionL)
+lc.unsubscribe(subscriptionG)
+lc.unsubscribe(subscriptionE)
+lc.unsubscribe(subscriptionU)
+lc.unsubscribe(subscriptionR)
+loc_rec_thread.join()
+
+#@苍茫墨客 981351402@qq.com
