@@ -52,12 +52,13 @@ location_txt = ""
 
 longitude = 0.0
 latitude = 0.0
-
+global work
+work = 0
 
 class send_thread(threading.Thread):
     def run(self):
         global camera_info_count, speed_cmd_count, vehicle_status_count, lux_info_count, gps_imu_info_count, \
-            esr_front_count, count, camera_status, vlc_status, uvd_status, lux_status, gps_status, esr_front_status, send_count
+            esr_front_count, count, camera_status, vlc_status, uvd_status, lux_status, gps_status, esr_front_status, auto_status, send_count, work
         while(1):
             if camera_info_count == 0:
                 camera_status = 0
@@ -89,7 +90,8 @@ class send_thread(threading.Thread):
             else:
                 esr_front_status = 1
                 esr_front_count = 0
-            sensor_status = struct.pack('7h', 49, camera_status, vlc_status, uvd_status, lux_status, gps_status, esr_front_status)
+            auto_status = 1
+            sensor_status = struct.pack('9h', 49, camera_status, vlc_status, uvd_status, lux_status, gps_status, esr_front_status , auto_status, work)
             # print camera_status, vlc_status, uvd_status, lux_status, gps_status, esr_front_status
             if send_count>2:
                 udpSocket.sendto(sensor_status, address_v)
@@ -101,68 +103,76 @@ class send_thread(threading.Thread):
 
 class receive_thread (threading.Thread):
     def run(self):
+        global work
         while(1):
             udpData, address = udpSocket.recvfrom(1024)
             # print (struct.unpack('9b', udpData))
             msg = pad_control_info_t()
             msg.utime = 0
-            msg.esr_onoff = struct.unpack('9b',udpData)[1]
-            msg.lux40_onoff = struct.unpack('9b',udpData)[2]
-            msg.gps_onoff = struct.unpack('9b',udpData)[3]
-            msg.speed_updown = struct.unpack('9b',udpData)[4]
-            msg.lane_change = struct.unpack('9b',udpData)[5]
-            msg.drive_mode = struct.unpack('9b',udpData)[6]
-            if (struct.unpack('9b', udpData)[7] == 1):
+            msg.esr_onoff = struct.unpack('11b',udpData)[1]
+            msg.lux40_onoff = struct.unpack('11b',udpData)[2]
+            msg.gps_onoff = struct.unpack('11b',udpData)[3]
+            msg.speed_updown = struct.unpack('11b',udpData)[4]
+            msg.lane_change = struct.unpack('11b',udpData)[5]
+            msg.drive_mode = struct.unpack('11b',udpData)[6]
+            if (struct.unpack('11b', udpData)[7] == 1):
                 msg.longitude = float(location_txt.split(",")[2])
                 msg.latitude = float(location_txt.split(",")[1])
-            elif (struct.unpack('9b', udpData)[7] == 2):
+            elif (struct.unpack('11b', udpData)[7] == 2):
                 msg.longitude = float(location_txt.split(",")[5])
                 msg.latitude = float(location_txt.split(",")[4])
-            elif (struct.unpack('9b', udpData)[7] == 3):
+            elif (struct.unpack('11b', udpData)[7] == 3):
                 msg.longitude = float(location_txt.split(",")[8])
                 msg.latitude = float(location_txt.split(",")[7])
-            elif (struct.unpack('9b', udpData)[7] == 4):
+            elif (struct.unpack('11b', udpData)[7] == 4):
                 msg.longitude = float(location_txt.split(",")[11])
                 msg.latitude = float(location_txt.split(",")[10])
-            elif (struct.unpack('9b', udpData)[7] == 5):
+            elif (struct.unpack('11b', udpData)[7] == 5):
                 msg.longitude = float(location_txt.split(",")[14])
                 msg.latitude = float(location_txt.split(",")[13])
-            elif (struct.unpack('9b', udpData)[7] == 6):
+            elif (struct.unpack('11b', udpData)[7] == 6):
                 msg.longitude = float(location_txt.split(",")[17])
                 msg.latitude = float(location_txt.split(",")[16])
-            elif (struct.unpack('9b', udpData)[7] == 7):
+            elif (struct.unpack('11b', udpData)[7] == 7):
                 msg.longitude = float(location_txt.split(",")[20])
                 msg.latitude = float(location_txt.split(",")[19])
-            elif (struct.unpack('9b', udpData)[7] == 8):
+            elif (struct.unpack('11b', udpData)[7] == 8):
                 msg.longitude = float(location_txt.split(",")[23])
                 msg.latitude = float(location_txt.split(",")[22])
-            elif (struct.unpack('9b', udpData)[7] == 9):
+            elif (struct.unpack('11b', udpData)[7] == 9):
                 msg.longitude = float(location_txt.split(",")[26])
                 msg.latitude = float(location_txt.split(",")[25])
-            elif (struct.unpack('9b', udpData)[7] == 10):
+            elif (struct.unpack('11b', udpData)[7] == 10):
                 msg.longitude = float(location_txt.split(",")[29])
                 msg.latitude = float(location_txt.split(",")[28])
-            elif (struct.unpack('9b', udpData)[7] == 11):
+            elif (struct.unpack('11b', udpData)[7] == 11):
                 msg.longitude = float(location_txt.split(",")[32])
                 msg.latitude = float(location_txt.split(",")[31])
-            elif (struct.unpack('9b', udpData)[7] == 12):
+            elif (struct.unpack('11b', udpData)[7] == 12):
                 msg.longitude = float(location_txt.split(",")[35])
                 msg.latitude = float(location_txt.split(",")[34])
-            elif (struct.unpack('9b', udpData)[7] == 13):
+            elif (struct.unpack('11b', udpData)[7] == 13):
                 msg.longitude = float(location_txt.split(",")[38])
                 msg.latitude = float(location_txt.split(",")[37])
-            elif (struct.unpack('9b', udpData)[7] == 14):
+            elif (struct.unpack('11b', udpData)[7] == 14):
                 msg.longitude = 10000
                 msg.latitude = 10000
             else:
                 msg.longitude = 0
                 msg.latitude = 0
 
-            msg.follow_past = struct.unpack('9b',udpData)[8]
+            msg.follow_past = struct.unpack('11b',udpData)[8]
+            msg.work_onoff = struct.unpack('11b',udpData)[9]
+            msg.path_id = struct.unpack('11b',udpData)[10]
             # print(msg.latitude, msg.longitude)
             lc.publish("PAD_CONTROL", msg.encode())
             # print(time.time(), msg.speed_updown)
             # print (msg.lane_change,msg.speed_updown)
+            if msg.work_onoff == 1:
+                work = 2
+            elif msg.work_onoff == 2:
+                work = 1
+            print (msg.work_onoff, msg.path_id)
 
 
 class readtxt_thread(threading.Thread):
@@ -308,9 +318,10 @@ def my_handler(channel, data):
         yawRate = vehicle_status.yawRate
         accelerationLon = vehicle_status.accelerationLon
         accelerationLat = vehicle_status.accelerationLat
-        vehicle_status_udp = struct.pack('hqif2i3fi6f', message_id, udp_time, nauto, steerPos, steerSpe, light, speLeft,
+        work = 1
+        vehicle_status_udp = struct.pack('hqif2i3fi6fi', message_id, udp_time, nauto, steerPos, steerSpe, light, speLeft,
                                          speRight, vot, shift, disLeft, disRight, speo, yawRate, accelerationLon,
-                                         accelerationLat)
+                                         accelerationLat,work)
         udpSocket.sendto(vehicle_status_udp, address_v)
         vehicle_status_count += 1
         # print(time.time(),vot)
