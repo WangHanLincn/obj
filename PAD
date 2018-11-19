@@ -1,4 +1,4 @@
-#!/home/lvchi/anaconda3/bin/python
+#!/home/ab/anaconda3/bin/python
 #-*-coding:utf-8-*-
 import lcm
 import struct
@@ -11,9 +11,9 @@ from socket import *
 # HOST = '192.168.0.194'
 # HOST = '192.168.1.127'
 # HOST = '192.168.100.178'
-from lcmtypes import route_status_t
+# from lcmtypes import route_status_t
 
-HOST = '192.168.0.126'
+HOST = '192.168.169.101'
 PORT = 9801
 udpSocket = socket(AF_INET, SOCK_DGRAM)
 # udpSocket.settimeout(0.5)
@@ -52,8 +52,6 @@ location_txt = ""
 
 longitude = 0.0
 latitude = 0.0
-global work
-work = 1
 
 
 class send_thread(threading.Thread):
@@ -116,10 +114,16 @@ class receive_thread(threading.Thread):
             msg.speed_updown = struct.unpack('27b',udpData)[4]
             msg.lane_change = struct.unpack('27b',udpData)[5]
             msg.drive_mode = struct.unpack('27b',udpData)[6]
-            msg.work_onoff = struct.unpack('27b',udpData)[7]
-            msg.cancel = struct.unpack('27b', udpData)[8]
             msg.follow_past = struct.unpack('27b',udpData)[9]
             # print(msg.latitude, msg.longitude)
+            # lon = struct.unpack('27b', udpData)[11:19]
+            # # print (lon)
+            # longitude = struct.pack('8b', *lon)
+            # msg.longitude = struct.unpack('<d', longitude)[0]
+            # lat = struct.unpack('27b', udpData)[19:]
+            # # print (lat)
+            # latitude = struct.pack('8b', *lat)
+            # msg.latitude = struct.unpack('<d', latitude)[0]
             lc.publish("PAD_CONTROL", msg.encode())
             # print(time.time(), msg.speed_updown)
             # print (msg.lane_change,msg.speed_updown)
@@ -129,24 +133,32 @@ class receive_thread(threading.Thread):
             #     work = 1
             # print (msg.work_onoff, msg.path_id, L, msg.drive_mode, msg.cancel)
             msg1 = route_command_t()
-            msg1.utime = 0.0
+            msg1.utime = 0
             # msg1.type = struct.unpack('12b',udpData)[9]
             msg1.index = struct.unpack('27b',udpData)[10]
             lon = struct.unpack('27b',udpData)[11:19]
-            print (lon)
+            # print (lon)
             longitude = struct.pack('8b', *lon)
             msg1.longitude = struct.unpack('<d', longitude)[0]
             lat = struct.unpack('27b',udpData)[19:]
-            print (lat)
+            # print (lat)
             latitude = struct.pack('8b', *lat)
             msg1.latitude = struct.unpack('<d', latitude)[0]
             # msg1.longitude = struct.unpack('12b',udpData)[11]
             # msg1.latitude = struct.unpack('12b',udpData)[12]
-            if msg1.index == -1 and (sum(lon) != 0):
+            if msg1.index == -1 and (sum(lon) == 0):
+                msg1.type = -1
+            elif msg1.index == -1 and (sum(lon) != 0):
                 msg1.type = 0
             elif msg1.index != -1 and (sum(lon) == 0):
                 msg1.type = 1
             lc.publish("ROUTE_COMMAND", msg1.encode())
+            msg2 = work_t()
+            msg2.utime = 0
+            msg2.work = struct.unpack('27b',udpData)[7]
+            # print (type(msg2.work))
+            # print (struct.unpack('27b',udpData)[7])
+            lc.publish("WORK_CMD", msg2.encode())
             # e = struct.unpack('27b',udpData)
             # print (msg1.longitude, msg1.latitude, msg.speed_updown, msg.work_onoff, e)
             print (msg1.longitude, msg1.latitude)
@@ -295,14 +307,13 @@ def my_handler(channel, data):
         yawRate = vehicle_status.yawRate
         accelerationLon = vehicle_status.accelerationLon
         accelerationLat = vehicle_status.accelerationLat
-        work = vehicle_status.work
-        vehicle_status_udp = struct.pack('hqif2i3fi6fi', message_id, udp_time, nauto, steerPos, steerSpe, light, speLeft,
+        vehicle_status_udp = struct.pack('hqif2i3fi6f', message_id, udp_time, nauto, steerPos, steerSpe, light, speLeft,
                                          speRight, vot, shift, disLeft, disRight, speo, yawRate, accelerationLon,
-                                         accelerationLat,work)
+                                         accelerationLat)
         udpSocket.sendto(vehicle_status_udp, address_v)
         vehicle_status_count += 1
         # print(time.time(),vot)
-    elif channel =="LIDAR_OBJECT_SIDE":
+    elif channel =="LEFT_16LIDAR_RAW_DATA":
         lux_info_count += 1
     elif channel == "GPS_DATA":
         gps_imu_info = gps_imu_info_t.decode(data)
@@ -335,23 +346,31 @@ def my_handler(channel, data):
         # print longitude, latitude, yaw
         udpSocket.sendto(gps_imu_info_udp, address_v)
         gps_imu_info_count += 1
+        # print (longitude, latitude)
     elif channel == "UVD_PAD":
         pad_control_info = pad_control_info_t.decode(data)
         message_id = 45
         followPast = pad_control_info.follow_past
-        uvd_pad_udp = struct.pack('hB', message_id, followPast, cancel)
+        uvd_pad_udp = struct.pack('hB', message_id, followPast)
         udpSocket.sendto(uvd_pad_udp, address_v)
     elif channel == "ROUTE_STATUS":
         route_status = route_status_t.decode(data)
         message_id = 43
         status = route_status.status
-        longitude = route_status.longitude7
+        longitude = route_status.longitude
         latitude = route_status.latitude
-        id = route_status.id
+        id = 0
         route_udp = struct.pack('hB2dB', message_id, status, longitude, latitude, id)
         udpSocket.sendto(route_udp, address_v)
-    elif channel == "ESR_FRONT_DATA":
+        print (status)
+    elif channel == "ESR_FRONT_DATAljs":
         esr_front_count += 1
+    elif channel == "WORK_STATE":
+        work_cmd = work_t.decode(data)
+        message_id = 41
+        work = work_cmd.work
+        route_udp = struct.pack('hB', message_id, work)
+        udpSocket.sendto(route_udp, address_v)
 
 
 loc_rec_thread = send_thread()
@@ -366,15 +385,16 @@ data_rec_thread = readtxt_thread()
 data_rec_thread.setDaemon(True)
 data_rec_thread.start()
 
-lc = lcm.LCM()
+lc = lcm.LCM("udpm://239.255.76.67:7667?ttl=1")
 subscriptionC = lc.subscribe("camera", my_handler)
 subscriptionS = lc.subscribe("SPEED_CMD", my_handler)
 subscriptionV = lc.subscribe("VEHICLE_STATUS", my_handler)
-subscriptionL = lc.subscribe("LIDAR_OBJECT_SIDE", my_handler)
+subscriptionL = lc.subscribe("LEFT_16LIDAR_RAW_DATA", my_handler)
 subscriptionG = lc.subscribe("GPS_DATA", my_handler)
-subscriptionE = lc.subscribe("ESR_FRONT_DATA", my_handler)
+subscriptionE = lc.subscribe("ESR_FRONT_DATAljs", my_handler)
 subscriptionU = lc.subscribe("UVD_PAD", my_handler)
 subscriptionR = lc.subscribe("ROUTE_STATUS", my_handler)
+subscriptionW = lc.subscribe("WORK_STATE", my_handler)
 
 
 try:
@@ -391,6 +411,7 @@ lc.unsubscribe(subscriptionG)
 lc.unsubscribe(subscriptionE)
 lc.unsubscribe(subscriptionU)
 lc.unsubscribe(subscriptionR)
+lc.unsubscribe(subscriptionW)
 loc_rec_thread.join()
 
 #@苍茫墨客 981351402@qq.com
