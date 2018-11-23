@@ -146,12 +146,17 @@ class receive_thread(threading.Thread):
             msg1.latitude = struct.unpack('<d', latitude)[0]
             # msg1.longitude = struct.unpack('12b',udpData)[11]
             # msg1.latitude = struct.unpack('12b',udpData)[12]
-            if msg1.index == -1 and (sum(lon) == 0):
-                msg1.type = -1
-            elif msg1.index == -1 and (sum(lon) != 0):
-                msg1.type = 0
-            elif msg1.index != -1 and (sum(lon) == 0):
-                msg1.type = 1
+            if struct.unpack('27b',udpData)[8] == 1:
+                msg1.type = 2
+            else:
+                if msg1.index == -1 and (sum(lon) == 0):
+                    msg1.type = -1
+                elif msg1.index == -1 and (sum(lon) != 0):
+                    msg1.type = 0
+                elif msg1.index != -1 and (sum(lon) == 0):
+                    msg1.type = 1
+                if struct.unpack('27b',udpData)[8] == 1:
+                    msg1.type = 2
             lc.publish("ROUTE_COMMAND", msg1.encode())
             msg2 = work_t()
             msg2.utime = 0
@@ -161,7 +166,7 @@ class receive_thread(threading.Thread):
             lc.publish("WORK_CMD", msg2.encode())
             # e = struct.unpack('27b',udpData)
             # print (msg1.longitude, msg1.latitude, msg.speed_updown, msg.work_onoff, e)
-            print (msg1.longitude, msg1.latitude)
+            # print (msg1.longitude, msg1.latitude)
 
 
 class readtxt_thread(threading.Thread):
@@ -359,10 +364,9 @@ def my_handler(channel, data):
         status = route_status.status
         longitude = route_status.longitude
         latitude = route_status.latitude
-        id = 0
-        route_udp = struct.pack('hB2dB', message_id, status, longitude, latitude, id)
+        route_udp = struct.pack('hB2dB', message_id, status, longitude, latitude)
         udpSocket.sendto(route_udp, address_v)
-        print (status)
+        # print (status)
     elif channel == "ESR_FRONT_DATAljs":
         esr_front_count += 1
     elif channel == "WORK_STATE":
